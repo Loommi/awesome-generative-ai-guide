@@ -79,3 +79,23 @@ End-to-End LLM Application Deployment
 - [Code](https://github.com/AIAnytime/YouTube-Video-Summarization-App)
 
 ---
+
+## 5. Airport Navigator: Intelligent Indoor Wayfinding App
+
+### Difficulty Level: 4/5
+
+### Description:
+
+Design a cross-platform mobile companion that provides real-time indoor navigation for airports worldwide. The app fuses indoor maps, real-time operations data, and context-aware AI to deliver turn-by-turn guidance, queue-aware routing, and amenity recommendations tailored to a traveler's itinerary and accessibility preferences.
+
+### Skills Gained:
+
+Spatial data modeling, AR navigation UX, retrieval-augmented AI assistants, real-time routing algorithms
+
+### Resources:
+
+- [Design Doc](./airport_navigation_app.md)
+- [Airport Data Standards Overview](https://www.openspatialdata.io/blog/airport-indoor-maps)
+- [Indoor Routing with PostGIS Tutorial](https://postgis.net/workshops/postgis-intro/shortest_path.html)
+
+---
