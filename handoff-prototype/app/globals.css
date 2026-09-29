@@ -1,0 +1,506 @@
+:root {
+  --bg: #050709;
+  --bg-lift: #0a0f13;
+  --ink: #e9f3f2;
+  --ink-dim: rgba(233, 243, 242, 0.46);
+  --ink-faint: rgba(233, 243, 242, 0.22);
+  --accent: #5ff0dc;
+  --wait: #e7b75a;
+  --bad: #f06a5f;
+  --line: rgba(233, 243, 242, 0.14);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+/* ---------- Stage ---------- */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  background: radial-gradient(120% 90% at 50% 55%, var(--bg-lift) 0%, var(--bg) 70%);
+}
+
+.stage-display {
+  background: radial-gradient(90% 70% at 50% 60%, #0b1216 0%, #050709 65%, #020304 100%);
+  cursor: default;
+}
+
+/* A faint floor line gives the wall a sense of depth without decoration. */
+.horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background: radial-gradient(60% 100% at 50% 100%, rgba(95, 240, 220, 0.05), transparent 70%);
+  pointer-events: none;
+}
+
+/* ---------- The object ---------- */
+
+.object {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(62vw, 36dvh, 360px);
+  aspect-ratio: 4 / 5;
+  margin-left: calc(min(62vw, 36dvh, 360px) / -2);
+  margin-top: calc(min(62vw, 36dvh, 360px) * -0.625);
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
+  transform-origin: 50% 50%;
+}
+
+.stage-display .object {
+  width: min(26vw, 44dvh);
+  margin-left: calc(min(26vw, 44dvh) / -2);
+  margin-top: calc(min(26vw, 44dvh) * -0.625);
+}
+
+.object[data-phase="dragging"] {
+  cursor: grabbing;
+}
+
+.object img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: 8.5%;
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(95, 240, 220, 0.05);
+}
+
+/* Soft light the object casts; brightens when held or arriving. */
+.object-glow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(95, 240, 220, 0.2), transparent);
+  opacity: 0.55;
+  transition: opacity 400ms ease;
+  pointer-events: none;
+}
+
+.object[data-phase="dragging"] .object-glow,
+.object[data-phase="entering"] .object-glow {
+  opacity: 1;
+  transition-duration: 120ms;
+}
+
+/* ---------- Chrome ---------- */
+
+.chrome-top {
+  position: absolute;
+  top: max(18px, env(safe-area-inset-top));
+  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  transition: opacity 600ms ease;
+  z-index: 2;
+}
+
+.chrome-top[data-hidden="true"] {
+  opacity: 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--wait);
+  box-shadow: 0 0 10px currentColor;
+  color: var(--wait);
+  transition: background 300ms ease;
+}
+
+.status[data-tone="ok"] .status-dot {
+  background: var(--accent);
+  color: var(--accent);
+}
+
+.status[data-tone="bad"] .status-dot {
+  background: var(--bad);
+  color: var(--bad);
+}
+
+.status[data-tone="wait"] .status-dot {
+  animation: breathe 1.8s ease-in-out infinite;
+}
+
+.status-text {
+  transition: opacity 800ms ease;
+}
+
+.status[data-quiet="true"] .status-text {
+  opacity: 0;
+}
+
+.room-tag {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.ghost-button {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 12px 22px;
+  min-height: 44px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    opacity 200ms ease;
+}
+
+.ghost-button:hover:not(:disabled) {
+  border-color: rgba(95, 240, 220, 0.45);
+  background: rgba(95, 240, 220, 0.06);
+}
+
+.ghost-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Things that fade in and out without layout shifts. */
+.away-note,
+.hint,
+.idle-note,
+.return-action,
+.pairing {
+  transition:
+    opacity 450ms ease,
+    transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.away-note[data-show="false"],
+.hint[data-show="false"],
+.idle-note[data-show="false"],
+.return-action[data-show="false"],
+.pairing[data-show="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.away-note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  transition-delay: 250ms;
+}
+
+.away-note[data-show="false"] {
+  transition-delay: 0ms;
+  transition-duration: 150ms;
+}
+
+.away-note p {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(34px, env(safe-area-inset-bottom));
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.idle-note {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  margin: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: clamp(13px, 1.1vw, 20px);
+  font-weight: 300;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+  transition-delay: 350ms;
+}
+
+.idle-note[data-show="false"] {
+  transition-delay: 0ms;
+  transition-duration: 120ms;
+}
+
+.return-action {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + min(26vw, 44dvh) * 0.625 + 28px);
+  display: flex;
+  justify-content: center;
+}
+
+.return-action[data-show="false"] {
+  transform: translateY(-6px);
+}
+
+/* ---------- Pairing ---------- */
+
+.pairing {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+.pairing[data-show="false"] {
+  transform: scale(0.98);
+}
+
+.pairing-title {
+  margin: 0;
+  font-size: clamp(13px, 1.1vw, 20px);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.qr {
+  width: clamp(160px, 20vmin, 300px);
+  aspect-ratio: 1;
+  padding: clamp(12px, 1.6vmin, 22px);
+  border-radius: 18px;
+  background: #e9f3f2;
+  box-shadow: 0 0 80px rgba(95, 240, 220, 0.12);
+}
+
+.qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.room-code {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: clamp(34px, 4.5vw, 72px);
+  letter-spacing: 0.35em;
+  padding-left: 0.35em;
+  color: var(--ink);
+}
+
+.pairing-url {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ---------- Join / home ---------- */
+
+.stage-join,
+.stage-home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.join {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.join label {
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.join input {
+  width: 6.2em;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 48px;
+  letter-spacing: 0.3em;
+  padding: 6px 0 6px 0.3em;
+  text-align: center;
+  outline: none;
+}
+
+.join input:focus {
+  border-bottom-color: rgba(95, 240, 220, 0.6);
+}
+
+.join input::placeholder {
+  color: rgba(233, 243, 242, 0.1);
+}
+
+.home-links {
+  display: flex;
+  gap: 48px;
+}
+
+.home-links a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 15px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-links a:hover {
+  border-bottom-color: var(--accent);
+}
+
+.home-note {
+  margin-top: 36px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+/* ---------- Debug ---------- */
+
+.debug {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: min(420px, calc(100vw - 24px));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  z-index: 10;
+  pointer-events: auto;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.debug dl {
+  margin: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.debug dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.debug dt {
+  color: var(--ink-faint);
+}
+
+.debug dd {
+  margin: 0;
+  color: var(--ink);
+  text-align: right;
+}
+
+.debug pre {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status[data-tone="wait"] .status-dot {
+    animation: none;
+  }
+}
