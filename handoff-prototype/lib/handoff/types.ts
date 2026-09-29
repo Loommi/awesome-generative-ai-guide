@@ -1,7 +1,5 @@
 export type DeviceRole = "controller" | "display";
 
-export const OBJECT_ID = "demo-object-01";
-
 export interface Vec2 {
   x: number;
   y: number;
@@ -39,13 +37,14 @@ export interface ObjectRecallEvent {
   timestamp: number;
 }
 
-/** Heartbeat / hello. `holding` lets a peer that reloaded recover who owns the object. */
+/** Heartbeat / hello. `held` lets a peer that reloaded recover who owns which object. */
 export interface PresenceEvent {
   type: "presence";
   id: string;
   role: DeviceRole;
   clientId: string;
-  holding: boolean;
+  /** Ids of the objects currently on this screen (including ones landing). */
+  held: string[];
   /** Set on the first message after joining, asks peers to answer immediately. */
   hello?: boolean;
   timestamp: number;

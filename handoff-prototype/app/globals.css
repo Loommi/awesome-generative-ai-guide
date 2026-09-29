@@ -67,26 +67,26 @@ button {
   pointer-events: none;
 }
 
-/* ---------- The object ---------- */
+/* ---------- The objects ---------- */
 
+/* Position and size come from the slot layout (inline style); motion is a transform on top. */
 .object {
+  --accent: 95, 240, 220;
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(62vw, 36dvh, 360px);
-  aspect-ratio: 4 / 5;
-  margin-left: calc(min(62vw, 36dvh, 360px) / -2);
-  margin-top: calc(min(62vw, 36dvh, 360px) * -0.625);
+  z-index: 1;
   touch-action: none;
   cursor: grab;
   will-change: transform;
   transform-origin: 50% 50%;
+  visibility: hidden;
 }
 
-.stage-display .object {
-  width: min(26vw, 44dvh);
-  margin-left: calc(min(26vw, 44dvh) / -2);
-  margin-top: calc(min(26vw, 44dvh) * -0.625);
+/* Whatever is moving flies above the resting objects. */
+.object[data-phase="dragging"],
+.object[data-phase="settling"],
+.object[data-phase="entering"],
+.object[data-phase="exiting"] {
+  z-index: 3;
 }
 
 .object[data-phase="dragging"] {
@@ -101,7 +101,7 @@ button {
   border-radius: 8.5%;
   box-shadow:
     0 30px 60px -20px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(95, 240, 220, 0.05);
+    0 0 0 1px rgba(var(--accent), 0.05);
 }
 
 /* Soft light the object casts; brightens when held or arriving. */
@@ -109,7 +109,7 @@ button {
   position: absolute;
   inset: -18%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(95, 240, 220, 0.2), transparent);
+  background: radial-gradient(closest-side, rgba(var(--accent), 0.2), transparent);
   opacity: 0.55;
   transition: opacity 400ms ease;
   pointer-events: none;
@@ -119,6 +119,47 @@ button {
 .object[data-phase="entering"] .object-glow {
   opacity: 1;
   transition-duration: 120ms;
+}
+
+/* Where an object rests on the controller while it's on the display. Tap to call it back. */
+.slot-ghost {
+  position: absolute;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
+  border: 1px dashed var(--line);
+  border-radius: 8.5% / 6.8%;
+  background: rgba(255, 255, 255, 0.015);
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    opacity 450ms ease 250ms,
+    border-color 200ms ease;
+}
+
+.slot-ghost[data-show="false"] {
+  opacity: 0;
+  pointer-events: none;
+  transition-delay: 0ms;
+  transition-duration: 150ms;
+}
+
+.slot-ghost:hover:not(:disabled) {
+  border-color: rgba(95, 240, 220, 0.45);
+}
+
+.slot-ghost-action {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(233, 243, 242, 0.14);
 }
 
 /* ---------- Chrome ---------- */
@@ -224,7 +265,6 @@ button {
 }
 
 /* Things that fade in and out without layout shifts. */
-.away-note,
 .hint,
 .idle-note,
 .return-action,
@@ -234,37 +274,12 @@ button {
     transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.away-note[data-show="false"],
 .hint[data-show="false"],
 .idle-note[data-show="false"],
 .return-action[data-show="false"],
 .pairing[data-show="false"] {
   opacity: 0;
   pointer-events: none;
-}
-
-.away-note {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  transition-delay: 250ms;
-}
-
-.away-note[data-show="false"] {
-  transition-delay: 0ms;
-  transition-duration: 150ms;
-}
-
-.away-note p {
-  margin: 0;
-  font-size: 15px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
 }
 
 .hint {
@@ -305,15 +320,12 @@ button {
 
 .return-action {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(50% + min(26vw, 44dvh) * 0.625 + 28px);
-  display: flex;
-  justify-content: center;
+  z-index: 4;
+  transform: translateX(-50%);
 }
 
 .return-action[data-show="false"] {
-  transform: translateY(-6px);
+  transform: translate(-50%, -6px);
 }
 
 /* ---------- Pairing ---------- */

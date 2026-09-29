@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { analyzeThrow, VelocityTracker, type Edge, type ThrowAnalysis } from "./gesture";
 import { clamp, lerp, poseToTransform, REST, springHome, tween, type Pose, type Running, type Vec2Like } from "./motion";
-import { halfDiagonal, planEntry, planExit } from "./trajectory";
+import { halfDiagonal, planEntry, planExit, type Home } from "./trajectory";
 import type { ObjectHandoffEvent } from "./types";
 
-/** Animation state of the one persistent object on this screen. */
+/** Animation state of one persistent object on this screen. */
 export type ObjectPhase = "present" | "dragging" | "settling" | "exiting" | "away" | "entering";
 
 /** Everything the other screen needs to continue the motion. */
@@ -28,6 +28,8 @@ interface Options {
   /** The edge this object leaves through when thrown. */
   exitEdge: Edge;
   initiallyPresent: boolean;
+  /** The object's resting position (slot centre) in viewport px. */
+  home: () => Home;
   /** Gate throws (e.g. no peer connected). Invalid throws spring back. */
   canThrow?: () => boolean;
   /** Fired at release, before the exit animation, so the network event goes out immediately. */
@@ -111,13 +113,14 @@ export function useThrowable(opts: Options) {
       if (!el) return null;
       stop();
       const vp = viewport();
+      const home = optsRef.current.home();
       const from = { ...pose.current };
-      const plan = planExit({ viewport: vp, from, halfDiag: halfDiagonal(el), direction, speed, edge: optsRef.current.exitEdge });
+      const plan = planExit({ viewport: vp, home, from, halfDiag: halfDiagonal(el), direction, speed, edge: optsRef.current.exitEdge });
       const info: ThrowInfo = {
         direction,
         velocity: Math.round(speed),
         velocityNorm: speed / vp.h,
-        release: { x: (vp.w / 2 + from.x) / vp.w, y: (vp.h / 2 + from.y) / vp.h },
+        release: { x: (home.x + from.x) / vp.w, y: (home.y + from.y) / vp.h },
         edgeX: plan.edgeX,
         exitDuration: Math.round(plan.duration),
       };
@@ -155,7 +158,7 @@ export function useThrowable(opts: Options) {
       const el = ref.current;
       if (!el) return;
       stop();
-      const plan = planEntry({ viewport: viewport(), halfDiag: halfDiagonal(el), edge, event, latency });
+      const plan = planEntry({ viewport: viewport(), home: optsRef.current.home(), halfDiag: halfDiagonal(el), edge, event, latency });
       setPhase("entering");
       apply(plan.pose(plan.startT));
       const start = () => {

@@ -13,6 +13,12 @@ export interface Viewport {
   h: number;
 }
 
+/** An object's resting position (its slot centre) in viewport px. Poses are offsets from it. */
+export interface Home {
+  x: number;
+  y: number;
+}
+
 /** Half the object's diagonal: how far past an edge its centre must travel to be fully gone. */
 export function halfDiagonal(el: HTMLElement): number {
   return Math.hypot(el.offsetWidth, el.offsetHeight) / 2;
@@ -37,17 +43,18 @@ export interface ExitPlan {
 
 export function planExit(opts: {
   viewport: Viewport;
+  home: Home;
   from: Pose;
   halfDiag: number;
   direction: Vec2Like;
   speed: number;
   edge: Edge;
 }): ExitPlan {
-  const { viewport: vp, from, halfDiag, direction: d, edge } = opts;
+  const { viewport: vp, home, from, halfDiag, direction: d, edge } = opts;
   const speed = Math.max(opts.speed, 600);
   const endScale = 0.84;
-  const cx0 = vp.w / 2 + from.x;
-  const cy0 = vp.h / 2 + from.y;
+  const cx0 = home.x + from.x;
+  const cy0 = home.y + from.y;
   const toward = Math.max(0.2, edge === "top" ? -d.y : d.y);
 
   // Vertical distance for the centre to reach the edge, and to be fully past it.
@@ -87,13 +94,15 @@ export interface EntryPlan {
 
 export function planEntry(opts: {
   viewport: Viewport;
+  /** Where the object settles on this screen. */
+  home: Home;
   halfDiag: number;
   /** Edge of *this* screen the object comes in through. */
   edge: Edge;
   event: Pick<ObjectHandoffEvent, "direction" | "velocityNorm" | "edgeX" | "exitDuration" | "velocity">;
   latency: number;
 }): EntryPlan {
-  const { viewport: vp, halfDiag, edge, event, latency } = opts;
+  const { viewport: vp, home, halfDiag, edge, event, latency } = opts;
   const n = energy(event.velocityNorm);
 
   // Keep the incoming angle, but not so steep that it misses the screen.
@@ -105,14 +114,16 @@ export function planEntry(opts: {
 
   const startScale = 0.82;
   const reach = halfDiag * startScale + 8;
-  const entryX = vp.w * (0.5 + (event.edgeX - 0.5) * 0.85);
+  // Enter where the throw crossed the sender's edge, pulled a little toward
+  // this object's own slot so the curve into it stays short.
+  const entryX = lerp(vp.w * (0.5 + (event.edgeX - 0.5) * 0.85), home.x, 0.3);
   const edgeY = edge === "bottom" ? vp.h + reach : -reach;
   // Harder throws start further back so they carry more speed onto the screen.
   const back = lerp(10, 140, n);
   const S = { x: entryX - dx * back, y: edgeY - dy * back };
-  const C = { x: vp.w / 2, y: vp.h / 2 };
+  const C = { x: home.x, y: home.y };
   // Control point along the incoming direction: the path starts tangent to the
-  // throw and bends toward centre.
+  // throw and bends toward the object's slot.
   const k = (Math.abs(C.y - S.y) * 0.6) / Math.abs(dy);
   const P = { x: S.x + dx * k, y: S.y + dy * k };
 

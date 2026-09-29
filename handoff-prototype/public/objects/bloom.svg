@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="800" height="1000">
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#2a0f1a"/>
+      <stop offset="0.55" stop-color="#14070d"/>
+      <stop offset="1" stop-color="#05070b"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd9e3" stop-opacity="0.75"/>
+      <stop offset="0.4" stop-color="#ff7896" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#c23e68" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.13"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="0.5" cy="0.47" r="0.5">
+      <stop offset="0" stop-color="#ff7896" stop-opacity="0.34"/>
+      <stop offset="0.45" stop-color="#c23e68" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#c23e68" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="slab"><rect x="4" y="4" width="392" height="492" rx="34"/></clipPath>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffffff"/><stop offset="0.3" stop-color="#ffd3de"/><stop offset="1" stop-color="#ff7896" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect x="4" y="4" width="392" height="492" rx="34" fill="url(#glass)"/>
+  <g clip-path="url(#slab)">
+    <rect width="400" height="500" fill="url(#aura)"/>
+    <g stroke="#ff7896" stroke-opacity="0.05" stroke-width="1">
+      <path d="M0 90H400M0 150H400M0 210H400M0 270H400M0 330H400M0 390H400"/>
+      <path d="M50 0V500M110 0V500M170 0V500M230 0V500M290 0V500M350 0V500"/>
+    </g>
+    <g transform="translate(200 236)">
+      <path d="M0 0 Q54.9 20.0 106.2 0.0" fill="none" stroke="#ff9db4" stroke-opacity="0.36" stroke-width="1.1"/>
+      <circle cx="106.2" cy="0.0" r="2.8" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q40.1 33.7 89.4 32.6" fill="none" stroke="#ff9db4" stroke-opacity="0.51" stroke-width="1.1"/>
+      <circle cx="89.4" cy="32.6" r="2.3" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q26.0 45.1 72.4 60.8" fill="none" stroke="#ff9db4" stroke-opacity="0.50" stroke-width="1.1"/>
+      <circle cx="72.4" cy="60.8" r="1.7" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q10.6 60.2 55.5 96.2" fill="none" stroke="#ff9db4" stroke-opacity="0.33" stroke-width="1.1"/>
+      <circle cx="55.5" cy="96.2" r="1.8" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-10.6 59.9 19.2 109.0" fill="none" stroke="#ff9db4" stroke-opacity="0.63" stroke-width="1.1"/>
+      <circle cx="19.2" cy="109.0" r="1.8" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-28.0 48.5 -17.7 100.3" fill="none" stroke="#ff9db4" stroke-opacity="0.55" stroke-width="1.1"/>
+      <circle cx="-17.7" cy="100.3" r="3.3" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-49.5 41.5 -58.7 101.7" fill="none" stroke="#ff9db4" stroke-opacity="0.46" stroke-width="1.1"/>
+      <circle cx="-58.7" cy="101.7" r="3.4" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-48.6 17.6 -72.0 60.5" fill="none" stroke="#ff9db4" stroke-opacity="0.64" stroke-width="1.1"/>
+      <circle cx="-72.0" cy="60.5" r="2.1" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-54.1 -0.1 -92.4 33.6" fill="none" stroke="#ff9db4" stroke-opacity="0.35" stroke-width="1.1"/>
+      <circle cx="-92.4" cy="33.6" r="2.2" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-66.1 -24.1 -127.9 0.0" fill="none" stroke="#ff9db4" stroke-opacity="0.37" stroke-width="1.1"/>
+      <circle cx="-127.9" cy="0.0" r="2.6" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-50.6 -42.5 -112.9 -41.1" fill="none" stroke="#ff9db4" stroke-opacity="0.45" stroke-width="1.1"/>
+      <circle cx="-112.9" cy="-41.1" r="2.6" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-26.0 -45.2 -72.6 -60.9" fill="none" stroke="#ff9db4" stroke-opacity="0.32" stroke-width="1.1"/>
+      <circle cx="-72.6" cy="-60.9" r="2.0" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q-11.6 -66.1 -61.0 -105.6" fill="none" stroke="#ff9db4" stroke-opacity="0.47" stroke-width="1.1"/>
+      <circle cx="-61.0" cy="-105.6" r="2.2" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q11.3 -63.8 -20.4 -116.0" fill="none" stroke="#ff9db4" stroke-opacity="0.48" stroke-width="1.1"/>
+      <circle cx="-20.4" cy="-116.0" r="2.1" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q35.0 -60.4 22.0 -125.0" fill="none" stroke="#ff9db4" stroke-opacity="0.58" stroke-width="1.1"/>
+      <circle cx="22.0" cy="-125.0" r="2.0" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q49.4 -41.4 58.6 -101.6" fill="none" stroke="#ff9db4" stroke-opacity="0.51" stroke-width="1.1"/>
+      <circle cx="58.6" cy="-101.6" r="3.2" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q64.2 -23.3 95.1 -79.8" fill="none" stroke="#ff9db4" stroke-opacity="0.42" stroke-width="1.1"/>
+      <circle cx="95.1" cy="-79.8" r="3.4" fill="#ffe3ea" filter="url(#glow)"/>
+      <path d="M0 0 Q53.5 0.0 91.3 -33.2" fill="none" stroke="#ff9db4" stroke-opacity="0.47" stroke-width="1.1"/>
+      <circle cx="91.3" cy="-33.2" r="3.0" fill="#ffe3ea" filter="url(#glow)"/>
+      <circle r="60" fill="none" stroke="#ff7896" stroke-opacity="0.3"/>
+      <circle r="96" fill="none" stroke="#ff7896" stroke-opacity="0.18"/>
+      <circle r="140" fill="none" stroke="#ff7896" stroke-opacity="0.1"/>
+      <circle r="50" fill="url(#core)"/>
+      <circle r="5" fill="#ffffff" filter="url(#glow)"/>
+    </g>
+    <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#ffd9e3">
+      <text x="32" y="52" font-size="12" letter-spacing="3.5" fill-opacity="0.8">SIGNAL</text>
+      <text x="368" y="52" font-size="12" letter-spacing="2" text-anchor="end" fill-opacity="0.45">04</text>
+      <text x="32" y="428" font-size="22" font-weight="300" letter-spacing="1.5" fill="#fbfbff">Signal Bloom</text>
+      <text x="32" y="456" font-size="10.5" letter-spacing="2.2" fill-opacity="0.5">18 NODES  ·  40 HZ  ·  COHERENT</text>
+    </g>
+    <path d="M32 396H120" stroke="#ff7896" stroke-opacity="0.5"/>
+    <rect width="400" height="500" fill="url(#sheen)"/>
+  </g>
+  <rect x="4.75" y="4.75" width="390.5" height="490.5" rx="33.25" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
+</svg>

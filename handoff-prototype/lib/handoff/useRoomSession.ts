@@ -15,8 +15,12 @@ const PEER_TIMEOUT_MS = 6500;
 
 export interface PeerState {
   connected: boolean;
-  holding: boolean;
+  /** Object ids the peer says it holds. */
+  held: string[];
 }
+
+const NOBODY: PeerState = { connected: false, held: [] };
+const sameList = (a: string[], b: string[]) => a.length === b.length && a.every((v, i) => v === b[i]);
 
 export interface RoomSession {
   room: string;
@@ -38,8 +42,8 @@ const randomId = () => Math.random().toString(36).slice(2, 10);
 export function useRoomSession(opts: {
   room: string;
   role: DeviceRole;
-  /** Whether this device currently holds the object (shared in presence). */
-  holding: boolean;
+  /** Object ids this device currently holds (shared in presence). */
+  held: string[];
   prefer?: TransportKind;
   onEvent: (event: HandoffEvent, latency: number) => void;
 }): RoomSession {
@@ -47,11 +51,12 @@ export function useRoomSession(opts: {
   const clientId = useMemo(randomId, []);
   const [status, setStatus] = useState<TransportStatus>("connecting");
   const [kind, setKind] = useState<TransportKind | null>(null);
-  const [peer, setPeer] = useState<PeerState>({ connected: false, holding: false });
+  const [peer, setPeer] = useState<PeerState>(NOBODY);
 
   const transport = useRef<Transport | null>(null);
-  const holding = useRef(opts.holding);
-  holding.current = opts.holding;
+  const held = useRef(opts.held);
+  held.current = opts.held;
+  const heldKey = opts.held.join(",");
   const onEvent = useRef(opts.onEvent);
   onEvent.current = opts.onEvent;
   const peerSeen = useRef(0);
@@ -78,20 +83,20 @@ export function useRoomSession(opts: {
 
   const sendPresence = useCallback(
     (hello = false) =>
-      send({ type: "presence", role, clientId, holding: holding.current, hello }),
+      send({ type: "presence", role, clientId, held: held.current, hello }),
     [send, role, clientId],
   );
 
   // Announce holding changes right away rather than waiting for the heartbeat.
   useEffect(() => {
     if (status === "open") sendPresence();
-  }, [opts.holding, status, sendPresence]);
+  }, [heldKey, status, sendPresence]);
 
   useEffect(() => {
     let disposed = false;
     const offs: Array<() => void> = [];
     setStatus("connecting");
-    setPeer({ connected: false, holding: false });
+    setPeer(NOBODY);
 
     const handle = (event: HandoffEvent) => {
       if ("role" in event && event.role === role) return; // another tab with our role
@@ -100,13 +105,12 @@ export function useRoomSession(opts: {
 
       if (event.type === "presence") {
         peerSeen.current = Date.now();
-        setPeer((p) =>
-          p.connected && p.holding === event.holding ? p : { connected: true, holding: event.holding },
-        );
+        const peerHeld = Array.isArray(event.held) ? [...event.held].sort() : [];
+        setPeer((p) => (p.connected && sameList(p.held, peerHeld) ? p : { connected: true, held: peerHeld }));
         if (event.hello) sendPresence();
       } else if (event.type === "bye") {
         peerSeen.current = 0;
-        setPeer({ connected: false, holding: false });
+        setPeer(NOBODY);
       }
       onEvent.current(event, latencyOf(event.timestamp));
     };
@@ -134,7 +138,7 @@ export function useRoomSession(opts: {
       sendPresence();
       if (peerSeen.current && Date.now() - peerSeen.current > PEER_TIMEOUT_MS) {
         peerSeen.current = 0;
-        setPeer({ connected: false, holding: false });
+        setPeer(NOBODY);
       }
     }, HEARTBEAT_MS);
 

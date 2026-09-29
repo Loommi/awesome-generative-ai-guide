@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="800" height="1000">
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#1d1533"/>
+      <stop offset="0.55" stop-color="#0d0a1c"/>
+      <stop offset="1" stop-color="#05070b"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6d9ff" stop-opacity="0.75"/>
+      <stop offset="0.4" stop-color="#b48cff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#6d5bd6" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.13"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="0.5" cy="0.47" r="0.5">
+      <stop offset="0" stop-color="#b48cff" stop-opacity="0.34"/>
+      <stop offset="0.45" stop-color="#6d5bd6" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#6d5bd6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="slab"><rect x="4" y="4" width="392" height="492" rx="34"/></clipPath>
+    <linearGradient id="faceA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9ddff" stop-opacity="0.55"/><stop offset="1" stop-color="#8f6cff" stop-opacity="0.08"/></linearGradient>
+    <linearGradient id="faceB" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b0ff" stop-opacity="0.35"/><stop offset="1" stop-color="#4b3aa8" stop-opacity="0.05"/></linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffffff"/><stop offset="0.3" stop-color="#e2d4ff"/><stop offset="1" stop-color="#b48cff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect x="4" y="4" width="392" height="492" rx="34" fill="url(#glass)"/>
+  <g clip-path="url(#slab)">
+    <rect width="400" height="500" fill="url(#aura)"/>
+    <g stroke="#b48cff" stroke-opacity="0.05" stroke-width="1">
+      <path d="M0 90H400M0 150H400M0 210H400M0 270H400M0 330H400M0 390H400"/>
+      <path d="M50 0V500M110 0V500M170 0V500M230 0V500M290 0V500M350 0V500"/>
+    </g>
+    <g transform="translate(200 236)">
+      <circle r="120" fill="none" stroke="#b48cff" stroke-opacity="0.18" stroke-dasharray="1 7"/>
+      <circle r="150" fill="none" stroke="#b48cff" stroke-opacity="0.1"/>
+      <polygon points="0,-150 52,-40 30,120 0,150 -30,120 -52,-40" fill="url(#faceB)" stroke="#d9c7ff" stroke-opacity="0.6"/>
+      <polygon points="0,-150 52,-40 0,-10" fill="url(#faceA)"/>
+      <polygon points="0,-150 -52,-40 0,-10" fill="#ffffff" fill-opacity="0.06"/>
+      <polygon points="-52,-40 0,-10 -30,120" fill="#ffffff" fill-opacity="0.04"/>
+      <polygon points="52,-40 0,-10 30,120" fill="url(#faceA)" fill-opacity="0.6"/>
+      <g stroke="#efe6ff" stroke-opacity="0.55" fill="none" stroke-width="1">
+        <path d="M0 -150 L0 -10 L-30 120 M0 -10 L30 120 M-52 -40 L0 -10 L52 -40"/>
+      </g>
+      <polygon points="-96,-10 -74,-58 -62,20" fill="url(#faceB)" stroke="#d9c7ff" stroke-opacity="0.4"/>
+      <polygon points="92,30 118,-12 112,64" fill="url(#faceB)" stroke="#d9c7ff" stroke-opacity="0.4"/>
+      <circle r="44" cy="-10" fill="url(#core)" opacity="0.85"/>
+      <g fill="#f4eeff" filter="url(#glow)">
+        <circle cx="0" cy="-150" r="2.6"/><circle cx="52" cy="-40" r="1.8"/><circle cx="-52" cy="-40" r="1.8"/><circle cx="0" cy="-10" r="3.4"/>
+      </g>
+    </g>
+    <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#e6d9ff">
+      <text x="32" y="52" font-size="12" letter-spacing="3.5" fill-opacity="0.8">CRYSTAL</text>
+      <text x="368" y="52" font-size="12" letter-spacing="2" text-anchor="end" fill-opacity="0.45">02</text>
+      <text x="32" y="428" font-size="22" font-weight="300" letter-spacing="1.5" fill="#fbfbff">Aurora Shard</text>
+      <text x="32" y="456" font-size="10.5" letter-spacing="2.2" fill-opacity="0.5">HEXAGONAL  ·  6.2 MOHS  ·  RESONANT</text>
+    </g>
+    <path d="M32 396H120" stroke="#b48cff" stroke-opacity="0.5"/>
+    <rect width="400" height="500" fill="url(#sheen)"/>
+  </g>
+  <rect x="4.75" y="4.75" width="390.5" height="490.5" rx="33.25" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
+</svg>

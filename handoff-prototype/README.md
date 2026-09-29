@@ -55,12 +55,14 @@ It uses only Realtime **Broadcast**, so there are no tables, auth or RLS to set 
 
 ## Using it
 
+There are four objects: Lumen Seed, Aurora Shard, Tidal Map and Signal Bloom. Each one is thrown, caught and returned independently. On a portrait tablet they sit in a 2×2 grid, and on the wall they sit in a row. Each object lands in its own slot, so you can have several on the display at once.
+
 | Where | Gesture | Result |
 |---|---|---|
-| Controller | drag | Object follows your finger, lifts and leans; springs home on release |
-| Controller | quick flick upward | Object accelerates off the top and lands on the display |
-| Controller | tap **Retrieve** (while on display) | Display sends it back |
-| Display | tap the object | Reveals **Return to tablet** |
+| Controller | drag any object | It follows your finger, lifts above the others and leans; springs back to its slot on release |
+| Controller | quick flick upward | That object accelerates off the top and lands in its slot on the display |
+| Controller | tap an empty **On display** slot | The display sends that object back |
+| Display | tap an object | Reveals **Return to tablet** under it |
 | Display | flick it downward | Sends it back directly |
 
 A throw counts only when all of these hold (`lib/handoff/gesture.ts`, `THROW`):
@@ -77,9 +79,9 @@ Add `?debug=true` to either URL for the overlay. It shows the room, transport st
 
 - **One flight, two screens.** The event is sent at the moment of release, not when the exit ends. It carries the direction, speed (px/s and viewport-heights/s), the release point, where the object crossed the edge (`edgeX`) and the exit duration.
 - **Outgoing** (`planExit`): the object starts at the finger's release speed and accelerates along the flick vector, scaling down slightly. It takes about 140–250 ms, depending on speed and distance.
-- **Incoming** (`planEntry`): the object appears just past the matching edge at the same relative x. Its path is a curve that starts tangent to the throw direction and bends into the centre. Harder throws start further back, travel faster (≈270 ms rather than 400 ms), decelerate harder and overshoot very slightly. The object scales up from 0.82 to 1 as it arrives.
+- **Incoming** (`planEntry`): the object appears just past the matching edge at the same relative x. Its path is a curve that starts tangent to the throw direction and bends into that object's slot. Harder throws start further back, travel faster (≈270 ms rather than 400 ms), decelerate harder and overshoot very slightly. The object scales up from 0.82 to 1 as it arrives.
 - **Timing.** The display starts the entrance at `exitDuration × 0.85 + airGap` after the release timestamp. `airGap` is 25–80 ms and shrinks with speed. Network latency (`Date.now() − event.timestamp`) is subtracted from that wait. If the event arrives late, the animation starts part-way through instead of replaying from the beginning. A light clock-skew guard ignores obviously skewed device clocks. Measured locally, the display picks the object up about 20 ms after it fully leaves the tablet.
-- **Recovery.** Presence heartbeats carry `holding`, so if either device reloads, the controller works out who has the object.
+- **Recovery.** Presence heartbeats carry `held` (the ids on that screen), so if either device reloads, the controller works out where each object is.
 
 Throw on the controller, and the display receives:
 
@@ -112,13 +114,15 @@ lib/handoff/
   gesture.ts            VelocityTracker (least squares over last 90 ms) + analyzeThrow
   trajectory.ts         planExit / planEntry: gesture → motion on each screen
   motion.ts             Pose, rAF tween, momentum spring
-  useThrowable.ts       drag / throw / catch state machine for the object (animation state)
+  useThrowable.ts       drag / throw / catch state machine for one object (animation state)
+  objects.ts            the object catalog (id, name, asset, glow colour)
+  layout.ts / useSlots  resting slot for each object on each screen
   room.ts               room codes
 components/
   ControllerView.tsx    /controller
   DisplayView.tsx       /display
   PairingPanel.tsx      QR + room code
-  HandoffObject.tsx     the shared asset (public/objects/specimen.svg)
+  ThrowableObject.tsx   one object in its slot (assets in public/objects/)
 ```
 
-UI components never touch a transport. They use `useRoomSession` and `useThrowable`. To swap the asset, replace `public/objects/specimen.svg`, or point `OBJECT_SRC` at another image. It should have a 4:5 aspect ratio.
+UI components never touch a transport. They use `useRoomSession` and `useThrowable`. To add or swap an object, edit `OBJECTS` in `lib/handoff/objects.ts` and put a 4:5 image in `public/objects/`. The layout adapts to the number of objects.
