@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DebugOverlay, fmt } from "./DebugOverlay";
+import { DetailView, type CloseReason, type DetailHandle } from "./DetailView";
 import { PairingPanel } from "./PairingPanel";
 import { StatusLine } from "./StatusLine";
 import { preloadObjects, ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
@@ -10,8 +11,6 @@ import type { HandoffEvent, ObjectHandoffEvent, TransportKind } from "@/lib/hand
 import { useRoomSession } from "@/lib/handoff/useRoomSession";
 import { useSlots } from "@/lib/handoff/useSlots";
 import type { ObjectPhase, ReleaseInfo, ThrowInfo } from "@/lib/handoff/useThrowable";
-
-const ACTION_HIDE_MS = 4000;
 
 const isHeld = (phase: ObjectPhase | undefined) => phase !== undefined && phase !== "away" && phase !== "exiting";
 
@@ -22,15 +21,17 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
   const [release, setRelease] = useState<ReleaseInfo | null>(null);
   const [lastEvent, setLastEvent] = useState<{ event: HandoffEvent; latency: number } | null>(null);
   const [lastHandoff, setLastHandoff] = useState<{ event: ObjectHandoffEvent; latency: number } | null>(null);
-  /** Object whose "Return to tablet" action is showing. */
-  const [actionFor, setActionFor] = useState<string | null>(null);
+  /** Object open in the detail view. */
+  const [detail, setDetail] = useState<string | null>(null);
+  const detailRef = useRef<DetailHandle>(null);
+  const detailId = useRef<string | null>(null);
+  detailId.current = detail;
   const [justConnected, setJustConnected] = useState(false);
   const handles = useRef<Record<string, ThrowableHandle | null>>({});
   const peerConnected = useRef(false);
 
   const onPhase = useCallback((id: string, phase: ObjectPhase) => {
     setPhases((p) => (p[id] === phase ? p : { ...p, [id]: phase }));
-    if (phase !== "present" && phase !== "settling") setActionFor((a) => (a === id ? null : a));
   }, []);
 
   const onEvent = useCallback((event: HandoffEvent, latency: number) => {
@@ -38,7 +39,11 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
       handles.current[event.objectId]?.enter(event, latency, "bottom");
       setLastHandoff({ event, latency });
     }
-    if (event.type === "object_recall" && isKnownObject(event.objectId)) handles.current[event.objectId]?.throwOut();
+    if (event.type === "object_recall" && isKnownObject(event.objectId)) {
+      // Called back while being inspected: zoom back into the slot, then send it.
+      if (detailId.current === event.objectId) detailRef.current?.close("action");
+      else handles.current[event.objectId]?.throwOut();
+    }
     if (event.type !== "presence") setLastEvent({ event, latency });
   }, []);
 
@@ -49,13 +54,20 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
 
   const onThrow = useCallback(
     (id: string, info: ThrowInfo) => {
-      setActionFor((a) => (a === id ? null : a));
       const sent = session.send({ type: "object_handoff", objectId: id, source: "display", destination: "controller", ...info });
       if (sent) setLastEvent({ event: sent, latency: 0 });
     },
     [session.send],
   );
-  const onTap = useCallback((id: string) => setActionFor((a) => (a === id ? null : id)), []);
+  const onTap = useCallback((id: string) => setDetail(id), []);
+  const onDetailClosed = useCallback(
+    (reason: CloseReason) => {
+      const id = detail;
+      setDetail(null);
+      if (reason === "action" && id) handles.current[id]?.throwOut();
+    },
+    [detail],
+  );
   const canThrow = useCallback(() => peerConnected.current, []);
 
   // Brief "Controller connected" acknowledgement, then get out of the way.
@@ -65,13 +77,6 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
     const t = setTimeout(() => setJustConnected(false), 2200);
     return () => clearTimeout(t);
   }, [connected]);
-
-  // The return action is a transient affordance.
-  useEffect(() => {
-    if (!actionFor) return;
-    const t = setTimeout(() => setActionFor(null), ACTION_HIDE_MS);
-    return () => clearTimeout(t);
-  }, [actionFor]);
 
   // Fullscreen with F or a double click on empty space: no browser chrome on the TV.
   useEffect(() => {
@@ -96,11 +101,10 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
   const empty = held.length === 0;
   const pairing = !connected && empty;
   const idleText = justConnected ? "Controller connected" : "Waiting for objects";
-  const actionIndex = actionFor ? OBJECTS.findIndex((o) => o.id === actionFor) : -1;
-  const actionSlot = slots && actionIndex >= 0 ? slots[actionIndex] : null;
+  const detailIndex = detail ? OBJECTS.findIndex((o) => o.id === detail) : -1;
 
   return (
-    <main className="stage stage-display" onPointerDown={(e) => e.target === e.currentTarget && setActionFor(null)}>
+    <main className="stage stage-display">
       <div className="horizon" aria-hidden />
 
       <header className="chrome-top" data-hidden={pairing}>
@@ -140,23 +144,21 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
             onTap={onTap}
             onRelease={setRelease}
             onPhase={onPhase}
+            focused={detail === o.id}
           />
         ))}
 
-      <div
-        className="return-action"
-        data-show={Boolean(actionSlot)}
-        style={actionSlot ? { left: actionSlot.x, top: actionSlot.y + actionSlot.h / 2 + 24 } : undefined}
-      >
-        <button
-          type="button"
-          className="ghost-button"
-          onClick={() => actionFor && handles.current[actionFor]?.throwOut()}
-          disabled={!connected}
-        >
-          Return to tablet
-        </button>
-      </div>
+      {slots && detailIndex >= 0 && (
+        <DetailView
+          key={detail}
+          ref={detailRef}
+          spec={OBJECTS[detailIndex]}
+          from={slots[detailIndex]}
+          actionLabel="Return to tablet"
+          actionDisabled={!connected}
+          onClosed={onDetailClosed}
+        />
+      )}
 
       {debug && (
         <DebugOverlay

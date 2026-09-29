@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DebugOverlay, fmt } from "./DebugOverlay";
+import { DetailView, type CloseReason, type DetailHandle } from "./DetailView";
 import { StatusLine } from "./StatusLine";
 import { preloadObjects, ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
 import { isKnownObject, OBJECTS } from "@/lib/handoff/objects";
@@ -22,6 +23,9 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
   const [release, setRelease] = useState<ReleaseInfo | null>(null);
   const [lastEvent, setLastEvent] = useState<{ event: HandoffEvent; latency: number } | null>(null);
   const [thrownOnce, setThrownOnce] = useState(false);
+  /** Object open in the detail view. */
+  const [detail, setDetail] = useState<string | null>(null);
+  const detailRef = useRef<DetailHandle>(null);
   const handles = useRef<Record<string, ThrowableHandle | null>>({});
   const lastSentAt = useRef<Record<string, number>>({});
   const peerConnected = useRef(false);
@@ -78,6 +82,16 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
           : { tone: "ok" as const, text: "Display ready" };
 
   const canThrow = useCallback(() => peerConnected.current, []);
+  const onTap = useCallback((id: string) => setDetail(id), []);
+  const onDetailClosed = useCallback(
+    (reason: CloseReason) => {
+      const id = detail;
+      setDetail(null);
+      if (reason === "action" && id) handles.current[id]?.throwOut();
+    },
+    [detail],
+  );
+  const detailIndex = detail ? OBJECTS.findIndex((o) => o.id === detail) : -1;
   const anyPresent = OBJECTS.some((o) => (phases[o.id] ?? "present") === "present");
 
   return (
@@ -117,14 +131,28 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
             initiallyPresent
             canThrow={canThrow}
             onThrow={onThrow}
+            onTap={onTap}
             onRelease={setRelease}
             onPhase={onPhase}
+            focused={detail === o.id}
           />
         ))}
 
-      <p className="hint" data-show={!thrownOnce && session.peer.connected && anyPresent}>
-        Flick up to send
+      <p className="hint" data-show={!thrownOnce && session.peer.connected && anyPresent && !detail}>
+        Flick up to send · tap to inspect
       </p>
+
+      {slots && detailIndex >= 0 && (
+        <DetailView
+          key={detail}
+          ref={detailRef}
+          spec={OBJECTS[detailIndex]}
+          from={slots[detailIndex]}
+          actionLabel="Send to display"
+          actionDisabled={!session.peer.connected}
+          onClosed={onDetailClosed}
+        />
+      )}
 
       {debug && (
         <DebugOverlay

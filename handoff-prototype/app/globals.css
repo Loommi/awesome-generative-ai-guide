@@ -121,6 +121,12 @@ button {
   transition-duration: 120ms;
 }
 
+/* The original stays put (invisible) while its detail view is open. */
+.object[data-focused="true"] {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
 /* Where an object rests on the controller while it's on the display. Tap to call it back. */
 .slot-ghost {
   position: absolute;
@@ -267,7 +273,6 @@ button {
 /* Things that fade in and out without layout shifts. */
 .hint,
 .idle-note,
-.return-action,
 .pairing {
   transition:
     opacity 450ms ease,
@@ -276,7 +281,6 @@ button {
 
 .hint[data-show="false"],
 .idle-note[data-show="false"],
-.return-action[data-show="false"],
 .pairing[data-show="false"] {
   opacity: 0;
   pointer-events: none;
@@ -316,16 +320,6 @@ button {
 .idle-note[data-show="false"] {
   transition-delay: 0ms;
   transition-duration: 120ms;
-}
-
-.return-action {
-  position: absolute;
-  z-index: 4;
-  transform: translateX(-50%);
-}
-
-.return-action[data-show="false"] {
-  transform: translate(-50%, -6px);
 }
 
 /* ---------- Pairing ---------- */
@@ -514,5 +508,824 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .status[data-tone="wait"] .status-dot {
     animation: none;
+  }
+}
+
+/* ---------- Detail view ---------- */
+
+.detail {
+  --accent: 95, 240, 220;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  touch-action: manipulation;
+}
+
+.detail-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 60% at 50% 50%, rgba(var(--accent), 0.1), transparent 70%),
+    rgba(2, 4, 6, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  animation: detail-fade 420ms ease both;
+}
+
+.detail[data-closing="true"] .detail-backdrop,
+.detail[data-closing="true"] .detail-info,
+.detail[data-closing="true"] .detail-holo-wrap {
+  animation: detail-fade-out 260ms ease forwards;
+}
+
+.detail-layout {
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr) minmax(0, 0.95fr);
+  grid-template-areas: "card holo info";
+  align-items: center;
+  gap: clamp(16px, 3vw, 56px);
+  padding: clamp(24px, 5vh, 72px) clamp(24px, 4vw, 80px);
+}
+
+@media (orientation: portrait) {
+  .detail-layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "holo holo"
+      "card info";
+    padding: max(56px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom));
+  }
+}
+
+/* The card: FLIP-zoomed by script, then floats with a slow 3D tilt. */
+.detail-card-wrap {
+  grid-area: card;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+  min-height: 0;
+  height: 100%;
+}
+
+.detail-card {
+  position: relative;
+  width: min(100%, 36vh);
+  aspect-ratio: 4 / 5;
+  will-change: transform;
+}
+
+@media (orientation: landscape) {
+  .detail-card {
+    width: min(100%, 58vh);
+  }
+}
+
+.detail-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 8.5%;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  animation: detail-tilt 7s ease-in-out 600ms infinite;
+  box-shadow:
+    0 40px 90px -30px rgba(0, 0, 0, 0.9),
+    0 0 60px rgba(var(--accent), 0.25),
+    0 0 0 1px rgba(var(--accent), 0.25);
+}
+
+.detail-card-inner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* A band of light sweeping across the glass. */
+.detail-card-sheen {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.28) 48%, rgba(var(--accent), 0.25) 52%, transparent 62%);
+  transform: translateX(-70%);
+  animation: detail-sheen 3.6s ease-in-out 450ms infinite;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Shockwave rings and sparks bursting from the card as it lands. */
+.detail-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.detail-shock {
+  position: absolute;
+  left: -60px;
+  top: -60px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--accent), 0.9);
+  box-shadow: 0 0 30px rgba(var(--accent), 0.6), inset 0 0 20px rgba(var(--accent), 0.4);
+  opacity: 0;
+  animation: detail-shock 900ms cubic-bezier(0.1, 0.8, 0.2, 1) 380ms both;
+}
+
+.detail-shock.late {
+  animation-delay: 520ms;
+  border-width: 1px;
+}
+
+.detail-particle {
+  position: absolute;
+  left: calc(var(--s) / -2);
+  top: calc(var(--s) / -2);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px 2px rgba(var(--accent), 0.9);
+  opacity: 0;
+  animation: detail-particle 900ms cubic-bezier(0.1, 0.7, 0.3, 1) 400ms both;
+}
+
+/* The projection: a light cone from the card into a hologram that powers on. */
+.detail-holo-wrap {
+  grid-area: holo;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  height: 100%;
+  pointer-events: none;
+}
+
+.detail-holo {
+  width: min(100%, 78vh);
+  aspect-ratio: 1;
+  filter: drop-shadow(0 0 18px rgba(var(--accent), 0.55));
+  transform-origin: 50% 50%;
+  animation:
+    holo-power 700ms cubic-bezier(0.2, 0.9, 0.2, 1) 300ms both,
+    holo-flicker 5s steps(1) 1.2s infinite;
+}
+
+@media (orientation: portrait) {
+  .detail-holo {
+    width: min(100%, 46vh);
+  }
+}
+
+.detail-beam {
+  position: absolute;
+  inset: 8% 8% 8% -40%;
+  background: linear-gradient(90deg, rgba(var(--accent), 0.28), rgba(var(--accent), 0.05) 60%, transparent);
+  clip-path: polygon(0 42%, 100% 0, 100% 100%, 0 58%);
+  filter: blur(6px);
+  opacity: 0;
+  animation:
+    detail-beam-in 500ms ease 350ms forwards,
+    detail-beam-pulse 2.4s ease-in-out 900ms infinite;
+}
+
+@media (orientation: portrait) {
+  /* Card sits bottom-left: the cone rises from it, clear of the text. */
+  .detail-beam {
+    inset: 10% 10% -38% 0;
+    background: linear-gradient(0deg, rgba(var(--accent), 0.28), rgba(var(--accent), 0.05) 60%, transparent);
+    clip-path: polygon(10% 100%, 4% 0, 96% 0, 36% 100%);
+  }
+}
+
+/* Info column. */
+.detail-info {
+  grid-area: info;
+  min-width: 0;
+  color: var(--ink);
+}
+
+.detail-code {
+  margin: 0 0 12px;
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(var(--accent), 0.9);
+  animation: detail-rise 500ms ease 150ms both;
+}
+
+.detail-name {
+  margin: 0;
+  font-size: clamp(30px, 3.6vw, 56px);
+  font-weight: 250;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-shadow: 0 0 24px rgba(var(--accent), 0.55);
+}
+
+.detail-name span {
+  display: inline-block;
+  animation: detail-char 520ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.detail-tagline {
+  margin: 10px 0 26px;
+  font-size: 14px;
+  color: var(--ink-dim);
+  animation: detail-rise 500ms ease 420ms both;
+}
+
+.detail-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 22px;
+  margin: 0 0 24px;
+}
+
+.detail-stat {
+  position: relative;
+  padding-bottom: 10px;
+  animation: detail-rise 450ms ease both;
+}
+
+.detail-stat dt {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.detail-stat dd {
+  margin: 4px 0 0;
+  font-family: var(--mono);
+  font-size: clamp(20px, 1.9vw, 30px);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.detail-unit {
+  margin-left: 6px;
+  font-size: 0.5em;
+  letter-spacing: 0.1em;
+  color: rgba(var(--accent), 0.9);
+}
+
+.detail-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.detail-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform: scaleX(var(--fill));
+  background: linear-gradient(90deg, rgba(var(--accent), 0.4), rgb(var(--accent)));
+  box-shadow: 0 0 10px rgba(var(--accent), 0.8);
+  animation: detail-bar 1s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  animation-delay: inherit;
+}
+
+.detail-desc {
+  margin: 0 0 26px;
+  max-width: 42ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  animation: detail-rise 600ms ease 800ms both;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  animation: detail-rise 500ms ease 950ms both;
+}
+
+.ghost-button.accent {
+  border-color: rgba(var(--accent), 0.55);
+  background: rgba(var(--accent), 0.1);
+  box-shadow: 0 0 24px rgba(var(--accent), 0.2);
+}
+
+@media (orientation: portrait) {
+  .detail-info {
+    align-self: start;
+  }
+  .detail-stats {
+    gap: 12px 14px;
+  }
+  .detail-desc {
+    display: none;
+  }
+}
+
+/* ---------- Hologram SVG ---------- */
+
+.holo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.holo * {
+  transform-box: view-box;
+}
+
+.holo-stop-bright {
+  stop-color: rgb(var(--accent));
+  stop-opacity: 0.8;
+}
+
+.holo-stop-clear {
+  stop-color: rgb(var(--accent));
+  stop-opacity: 0;
+}
+
+.holo-ring,
+.holo-arc,
+.holo-ticks line,
+.holo-line,
+.holo-contour,
+.holo-bloom-ray,
+.holo-grid line {
+  fill: none;
+  stroke: rgb(var(--accent));
+  vector-effect: non-scaling-stroke;
+}
+
+.holo-ring {
+  stroke-opacity: 0.35;
+}
+
+.holo-ring.faint {
+  stroke-opacity: 0.12;
+}
+
+.holo-ticks line {
+  stroke-opacity: 0.4;
+}
+
+.holo-arc {
+  stroke-width: 3;
+  stroke-opacity: 0.7;
+  stroke-linecap: round;
+}
+
+.holo-line {
+  stroke-opacity: 0.55;
+  stroke-width: 1.2;
+}
+
+.holo-line.dim {
+  stroke-opacity: 0.25;
+}
+
+.holo-line.strong {
+  stroke-opacity: 0.9;
+  stroke-width: 1.6;
+}
+
+.holo-line.orbit {
+  stroke-opacity: 0.3;
+  stroke-dasharray: 3 7;
+}
+
+.holo-dot {
+  fill: #fff;
+}
+
+.holo-dot.glow {
+  fill: #fff;
+  filter: drop-shadow(0 0 6px rgb(var(--accent)));
+}
+
+.holo-fill-soft {
+  fill: rgba(var(--accent), 0.06);
+}
+
+.holo-scanline {
+  fill: rgba(var(--accent), 0.55);
+  animation: holo-scan 3.2s linear infinite;
+}
+
+.holo-spin,
+.holo-spin-slow,
+.holo-spin-rev,
+.holo-radar {
+  transform-origin: 300px 300px;
+}
+
+.holo-spin {
+  animation: holo-rotate 14s linear infinite;
+}
+
+.holo-spin-slow {
+  animation: holo-rotate 40s linear infinite;
+}
+
+.holo-spin-rev {
+  animation: holo-rotate 28s linear infinite reverse;
+}
+
+.holo-breathe {
+  transform-origin: 300px 300px;
+  animation: holo-breathe 3s ease-in-out infinite;
+}
+
+.holo-pulse-ring {
+  fill: none;
+  stroke: rgb(var(--accent));
+  transform-origin: 300px 300px;
+  animation: holo-wave 2.4s ease-out infinite;
+}
+
+/* Shard */
+.holo-ray {
+  fill: rgba(var(--accent), 0.12);
+}
+
+.holo-crystal {
+  transform-origin: 300px 300px;
+  animation: holo-turn 5s ease-in-out infinite;
+}
+
+.holo-facet-a {
+  fill: rgba(255, 255, 255, 0.35);
+  animation: holo-facet 5s ease-in-out infinite;
+}
+
+.holo-facet-a.dim {
+  animation-delay: -2.5s;
+}
+
+.holo-facet-b {
+  fill: rgba(var(--accent), 0.18);
+  stroke: rgba(var(--accent), 0.6);
+}
+
+.holo-facet-c {
+  fill: rgba(var(--accent), 0.3);
+  animation: holo-facet 5s ease-in-out -1.25s infinite;
+}
+
+.holo-sparkle {
+  fill: #fff;
+  filter: drop-shadow(0 0 5px rgb(var(--accent)));
+  transform: scale(0);
+  animation: holo-twinkle 2.4s ease-in-out infinite;
+}
+
+/* Terrain */
+.holo-grid line {
+  stroke-opacity: 0.08;
+}
+
+.holo-contour {
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: holo-draw 1.2s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+
+.holo-float {
+  animation: holo-float 5s ease-in-out infinite;
+}
+
+.holo-pin {
+  opacity: 0;
+  animation: holo-drop 700ms cubic-bezier(0.3, 1.6, 0.4, 1) both;
+}
+
+.holo-ping {
+  fill: none;
+  stroke: rgb(var(--accent));
+  animation: holo-wave 2s ease-out infinite;
+}
+
+.holo-label {
+  fill: #fff;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.holo-radar {
+  animation: holo-rotate 4s linear infinite;
+}
+
+/* Bloom */
+.holo-wave {
+  fill: none;
+  stroke: rgb(var(--accent));
+  stroke-width: 2;
+  transform-origin: 300px 300px;
+  animation: holo-wave 2.7s ease-out infinite;
+}
+
+.holo-bloom-ray {
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: holo-grow 2.9s cubic-bezier(0.3, 0.6, 0.2, 1) infinite;
+}
+
+.holo-node {
+  fill: #fff;
+  filter: drop-shadow(0 0 6px rgb(var(--accent)));
+  animation: holo-fire 2.9s ease-out infinite;
+}
+
+.holo-star {
+  fill: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 0 10px rgb(var(--accent)));
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes detail-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes detail-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes detail-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}
+
+@keyframes detail-char {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em) scale(0.6);
+    filter: blur(8px);
+    color: rgb(var(--accent));
+  }
+  60% {
+    opacity: 1;
+    color: #fff;
+    text-shadow: 0 0 24px rgb(var(--accent));
+  }
+}
+
+@keyframes detail-tilt {
+  0%,
+  100% {
+    transform: rotateY(-7deg) rotateX(4deg) translateY(0);
+  }
+  50% {
+    transform: rotateY(7deg) rotateX(-3deg) translateY(-8px);
+  }
+}
+
+@keyframes detail-sheen {
+  0% {
+    transform: translateX(-70%);
+  }
+  45%,
+  100% {
+    transform: translateX(70%);
+  }
+}
+
+@keyframes detail-shock {
+  0% {
+    opacity: 1;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(6);
+  }
+}
+
+@keyframes detail-particle {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateX(var(--d)) scale(0.2);
+  }
+}
+
+@keyframes detail-beam-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes detail-beam-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes detail-bar {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes holo-power {
+  0% {
+    opacity: 0;
+    transform: scale(0.2, 0.01);
+    filter: drop-shadow(0 0 40px rgb(var(--accent))) brightness(3);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.05, 0.02);
+  }
+  70% {
+    transform: scale(1.02, 1.04);
+    filter: drop-shadow(0 0 30px rgb(var(--accent))) brightness(1.6);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Rare two-frame glitch so the projection feels like light, not paint. */
+@keyframes holo-flicker {
+  0%,
+  96%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  97% {
+    opacity: 0.55;
+    transform: translateX(4px) skewX(-2deg);
+  }
+  98.5% {
+    opacity: 0.85;
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes holo-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes holo-breathe {
+  50% {
+    transform: scale(1.08);
+    opacity: 0.6;
+  }
+}
+
+@keyframes holo-scan {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(580px);
+    opacity: 0;
+  }
+}
+
+@keyframes holo-turn {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  25% {
+    transform: scaleX(0.35);
+  }
+  50% {
+    transform: scaleX(-1);
+  }
+  75% {
+    transform: scaleX(-0.35);
+  }
+}
+
+@keyframes holo-facet {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes holo-twinkle {
+  0%,
+  100% {
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    transform: scale(1) rotate(90deg);
+  }
+}
+
+@keyframes holo-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes holo-float {
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes holo-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes holo-wave {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+@keyframes holo-grow {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  55% {
+    stroke-dashoffset: 0;
+    opacity: 0.7;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes holo-fire {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.6);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1.8);
+  }
+  40% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail *,
+  .detail *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

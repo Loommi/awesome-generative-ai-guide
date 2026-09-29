@@ -62,7 +62,7 @@ There are four objects: Lumen Seed, Aurora Shard, Tidal Map and Signal Bloom. Ea
 | Controller | drag any object | It follows your finger, lifts above the others and leans; springs back to its slot on release |
 | Controller | quick flick upward | That object accelerates off the top and lands in its slot on the display |
 | Controller | tap an empty **On display** slot | The display sends that object back |
-| Display | tap an object | Reveals **Return to tablet** under it |
+| Either screen | tap an object | Opens its detail view: the card zooms out of its slot with a shockwave, a hologram powers on beside it, and stats count up. **Send to display** / **Return to tablet** closes it and throws. Tap outside, **Close** or Esc zooms it back |
 | Display | flick it downward | Sends it back directly |
 
 A throw counts only when all of these hold (`lib/handoff/gesture.ts`, `THROW`):
@@ -123,6 +123,8 @@ components/
   DisplayView.tsx       /display
   PairingPanel.tsx      QR + room code
   ThrowableObject.tsx   one object in its slot (assets in public/objects/)
+  DetailView.tsx        zoomed "inspect" view (FLIP zoom, burst, stats)
+  Holograms.tsx         the animated SVG hologram for each object
 ```
 
 UI components never touch a transport. They use `useRoomSession` and `useThrowable`. To add or swap an object, edit `OBJECTS` in `lib/handoff/objects.ts` and put a 4:5 image in `public/objects/`. The layout adapts to the number of objects.

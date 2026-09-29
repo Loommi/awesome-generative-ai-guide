@@ -32,6 +32,7 @@ export function ThrowableObject({
   onTap,
   onRelease,
   onPhase,
+  focused = false,
 }: {
   ref: Ref<ThrowableHandle>;
   spec: ObjectSpec;
@@ -43,6 +44,8 @@ export function ThrowableObject({
   onTap?: (id: string) => void;
   onRelease?: (info: ReleaseInfo) => void;
   onPhase: (id: string, phase: ObjectPhase) => void;
+  /** Hidden in place while its detail view is open. */
+  focused?: boolean;
 }) {
   const object = useThrowable({
     exitEdge,
@@ -73,7 +76,7 @@ export function ThrowableObject({
   } as CSSProperties;
 
   return (
-    <div ref={object.ref} className="object" data-phase={object.phase} data-object-id={spec.id} style={style} {...object.handlers}>
+    <div ref={object.ref} className="object" data-phase={object.phase} data-focused={focused} data-object-id={spec.id} style={style} {...object.handlers}>
       <div className="object-glow" aria-hidden />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={spec.src} alt={spec.name} draggable={false} decoding="sync" />
