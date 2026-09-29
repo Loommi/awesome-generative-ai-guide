@@ -33,6 +33,15 @@ The QR code points at the origin the display was opened from. If that is `localh
 
 On the display, press **F** or double-click empty space to go fullscreen. On the iPad, *Add to Home Screen* gives a chrome-free controller.
 
+### Deploy to Vercel
+
+1. In Vercel: **Add New → Project**, import `Loommi/awesome-generative-ai-guide`.
+2. Set **Root Directory** to `handoff-prototype`. The framework preset (Next.js) is detected automatically.
+3. Under **Environment Variables** add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (see below). Without them the deployed site still works, but only between two windows of the same browser.
+4. **Deploy.** Open `https://<your-app>.vercel.app/display` on the big screen and scan the QR code with the tablet.
+
+`NEXT_PUBLIC_APP_URL` is not needed on Vercel: the QR code uses the URL the display was opened from. These variables are baked in at build time, so redeploy after changing them.
+
 ### Supabase Realtime
 
 Copy `.env.example` to `.env.local` and fill in:
