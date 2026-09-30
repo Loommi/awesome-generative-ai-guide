@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useImperativeHandle, type CSSProperties, type Ref } from "react";
-import { preload } from "react-dom";
+import { moduleStatus, ModulePreview } from "./mission/ModulePreview";
 import type { Edge } from "@/lib/handoff/gesture";
 import type { Slot } from "@/lib/handoff/layout";
 import type { ObjectSpec } from "@/lib/handoff/objects";
-import type { ObjectHandoffEvent } from "@/lib/handoff/types";
+import type { DeviceRole, ObjectHandoffEvent } from "@/lib/handoff/types";
 import { useThrowable, type ObjectPhase, type ReleaseInfo, type ThrowInfo } from "@/lib/handoff/useThrowable";
 
 /** What a screen can do to one of its objects. */
@@ -16,14 +16,11 @@ export interface ThrowableHandle {
   phase: () => ObjectPhase;
 }
 
-export function preloadObjects(objects: ObjectSpec[]) {
-  for (const o of objects) preload(o.src, { as: "image", fetchPriority: "high" });
-}
-
 /** One persistent object resting in its slot. Both screens render every object from the start. */
 export function ThrowableObject({
   ref,
   spec,
+  role,
   slot,
   exitEdge,
   initiallyPresent,
@@ -32,10 +29,11 @@ export function ThrowableObject({
   onTap,
   onRelease,
   onPhase,
-  focused = false,
+  selected = false,
 }: {
   ref: Ref<ThrowableHandle>;
   spec: ObjectSpec;
+  role: DeviceRole;
   slot: Slot;
   exitEdge: Edge;
   initiallyPresent: boolean;
@@ -44,8 +42,8 @@ export function ThrowableObject({
   onTap?: (id: string) => void;
   onRelease?: (info: ReleaseInfo) => void;
   onPhase: (id: string, phase: ObjectPhase) => void;
-  /** Hidden in place while its detail view is open. */
-  focused?: boolean;
+  /** Highlighted while its inspector is open. */
+  selected?: boolean;
 }) {
   const object = useThrowable({
     exitEdge,
@@ -76,10 +74,18 @@ export function ThrowableObject({
   } as CSSProperties;
 
   return (
-    <div ref={object.ref} className="object" data-phase={object.phase} data-focused={focused} data-object-id={spec.id} style={style} {...object.handlers}>
+    <div
+      ref={object.ref}
+      className="object"
+      data-phase={object.phase}
+      data-selected={selected}
+      data-object-id={spec.id}
+      style={style}
+      aria-label={`Module ${spec.number}: ${spec.name}`}
+      {...object.handlers}
+    >
       <div className="object-glow" aria-hidden />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={spec.src} alt={spec.name} draggable={false} decoding="sync" />
+      <ModulePreview spec={spec} status={moduleStatus(role, object.phase)} />
     </div>
   );
 }

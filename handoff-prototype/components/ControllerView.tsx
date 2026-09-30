@@ -1,37 +1,41 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { DebugOverlay, fmt } from "./DebugOverlay";
-import { DetailView, type CloseReason, type DetailHandle } from "./DetailView";
-import { StatusLine } from "./StatusLine";
-import { preloadObjects, ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
+import { MissionHeader, type Indicator } from "./mission/MissionHeader";
+import { ModuleInspector, type CloseReason, type InspectorHandle } from "./mission/ModuleInspector";
+import { ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
 import { isKnownObject, OBJECTS } from "@/lib/handoff/objects";
 import type { HandoffEvent, TransportKind } from "@/lib/handoff/types";
 import { useRoomSession } from "@/lib/handoff/useRoomSession";
 import { useSlots } from "@/lib/handoff/useSlots";
 import type { ObjectPhase, ReleaseInfo, ThrowInfo } from "@/lib/handoff/useThrowable";
+import { MISSION } from "@/lib/mission/content";
 
 /** If the display says it isn't holding an object this long after we threw it, take it back. */
 const LOST_OBJECT_MS = 3000;
 
 const isHeld = (phase: ObjectPhase | undefined) => phase !== undefined && phase !== "away" && phase !== "exiting";
 
+/** The tablet: a portable operations terminal holding the four mission modules. */
 export function ControllerView({ room, debug, prefer }: { room: string; debug: boolean; prefer?: TransportKind }) {
-  preloadObjects(OBJECTS);
   const slots = useSlots(OBJECTS.length, "controller");
   const [phases, setPhases] = useState<Record<string, ObjectPhase>>({});
   const [release, setRelease] = useState<ReleaseInfo | null>(null);
   const [lastEvent, setLastEvent] = useState<{ event: HandoffEvent; latency: number } | null>(null);
   const [thrownOnce, setThrownOnce] = useState(false);
-  /** Object open in the detail view. */
+  /** Modules we asked the display to send back, until they start arriving. */
+  const [retrieving, setRetrieving] = useState<Record<string, boolean>>({});
+  /** Module open in the inspector. */
   const [detail, setDetail] = useState<string | null>(null);
-  const detailRef = useRef<DetailHandle>(null);
+  const detailRef = useRef<InspectorHandle>(null);
   const handles = useRef<Record<string, ThrowableHandle | null>>({});
   const lastSentAt = useRef<Record<string, number>>({});
   const peerConnected = useRef(false);
 
   const onPhase = useCallback((id: string, phase: ObjectPhase) => {
     setPhases((p) => (p[id] === phase ? p : { ...p, [id]: phase }));
+    if (phase !== "away") setRetrieving((r) => (r[id] ? { ...r, [id]: false } : r));
   }, []);
 
   const onEvent = useCallback((event: HandoffEvent, latency: number) => {
@@ -70,16 +74,19 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
     }
   }, [session.peer]);
 
-  const retrieve = (id: string) => session.send({ type: "object_recall", objectId: id, source: "controller" });
+  const retrieve = (id: string) => {
+    const sent = session.send({ type: "object_recall", objectId: id, source: "controller" });
+    if (sent) setRetrieving((r) => ({ ...r, [id]: true }));
+  };
 
-  const status =
+  const link: Indicator =
     session.status === "error"
-      ? { tone: "bad" as const, text: "Connection error" }
+      ? { tone: "bad", label: "LINK ERROR" }
       : session.status !== "open"
-        ? { tone: "wait" as const, text: "Connecting" }
+        ? { tone: "wait", label: "CONNECTING" }
         : !session.peer.connected
-          ? { tone: "wait" as const, text: "Waiting for display" }
-          : { tone: "ok" as const, text: "Display ready" };
+          ? { tone: "wait", label: "AWAITING COMMAND DISPLAY" }
+          : { tone: "ok", label: "COMMAND DISPLAY LINKED" };
 
   const canThrow = useCallback(() => peerConnected.current, []);
   const onTap = useCallback((id: string) => setDetail(id), []);
@@ -91,30 +98,38 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
     },
     [detail],
   );
-  const detailIndex = detail ? OBJECTS.findIndex((o) => o.id === detail) : -1;
+  const detailSpec = detail ? OBJECTS.find((o) => o.id === detail) : undefined;
   const anyPresent = OBJECTS.some((o) => (phases[o.id] ?? "present") === "present");
 
   return (
     <main className="stage stage-controller">
-      <header className="chrome-top">
-        <StatusLine tone={status.tone} text={status.text} />
-        <span className="room-tag">{room}</span>
-      </header>
+      <MissionHeader role="controller" indicators={[link]} room={room} />
 
       {slots &&
         OBJECTS.map((o, i) => (
           <button
-            key={`ghost-${o.id}`}
+            key={`dock-${o.id}`}
             type="button"
-            className="slot-ghost"
+            className="dock-slot"
             data-show={phases[o.id] === "away"}
-            style={{ left: slots[i].x - slots[i].w / 2, top: slots[i].y - slots[i].h / 2, width: slots[i].w, height: slots[i].h }}
+            data-retrieving={retrieving[o.id] || undefined}
+            style={
+              {
+                left: slots[i].x - slots[i].w / 2,
+                top: slots[i].y - slots[i].h / 2,
+                width: slots[i].w,
+                height: slots[i].h,
+                "--accent": o.accent,
+              } as CSSProperties
+            }
             onClick={() => retrieve(o.id)}
             disabled={!session.peer.connected}
             aria-label={`Retrieve ${o.name}`}
           >
-            <span>On display</span>
-            <span className="slot-ghost-action">Tap to retrieve</span>
+            <span className="dock-num">MOD {o.number}</span>
+            <span className="dock-name">{o.name}</span>
+            <span className="dock-state">{retrieving[o.id] ? "RETRIEVING" : MISSION.dockTitle}</span>
+            <span className="dock-action">{MISSION.dockAction}</span>
           </button>
         ))}
 
@@ -126,6 +141,7 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
               handles.current[o.id] = h;
             }}
             spec={o}
+            role="controller"
             slot={slots[i]}
             exitEdge="top"
             initiallyPresent
@@ -134,21 +150,20 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
             onTap={onTap}
             onRelease={setRelease}
             onPhase={onPhase}
-            focused={detail === o.id}
           />
         ))}
 
       <p className="hint" data-show={!thrownOnce && session.peer.connected && anyPresent && !detail}>
-        Flick up to send · tap to inspect
+        <span className="hint-arrow" aria-hidden />
+        {MISSION.hint}
       </p>
 
-      {slots && detailIndex >= 0 && (
-        <DetailView
-          key={detail}
+      {detailSpec && (
+        <ModuleInspector
+          key={detailSpec.id}
           ref={detailRef}
-          spec={OBJECTS[detailIndex]}
-          from={slots[detailIndex]}
-          actionLabel="Send to display"
+          spec={detailSpec}
+          actionLabel="TRANSFER TO COMMAND DISPLAY"
           actionDisabled={!session.peer.connected}
           onClosed={onDetailClosed}
         />

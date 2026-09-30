@@ -2,31 +2,35 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DebugOverlay, fmt } from "./DebugOverlay";
-import { DetailView, type CloseReason, type DetailHandle } from "./DetailView";
+import { MissionHeader, type Indicator } from "./mission/MissionHeader";
+import { ModuleInspector, type CloseReason, type InspectorHandle } from "./mission/ModuleInspector";
 import { PairingPanel } from "./PairingPanel";
-import { StatusLine } from "./StatusLine";
-import { preloadObjects, ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
+import { ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
+import { dockHeight, headerHeight } from "@/lib/handoff/layout";
 import { isKnownObject, OBJECTS } from "@/lib/handoff/objects";
 import type { HandoffEvent, ObjectHandoffEvent, TransportKind } from "@/lib/handoff/types";
 import { useRoomSession } from "@/lib/handoff/useRoomSession";
 import { useSlots } from "@/lib/handoff/useSlots";
 import type { ObjectPhase, ReleaseInfo, ThrowInfo } from "@/lib/handoff/useThrowable";
+import { MISSION } from "@/lib/mission/content";
 
 const isHeld = (phase: ObjectPhase | undefined) => phase !== undefined && phase !== "away" && phase !== "exiting";
 
+/**
+ * The wall: the ship's command display. Modules land in dedicated slots; tapping
+ * one expands it, and the rest shrink into a dock along the bottom edge.
+ */
 export function DisplayView({ room, debug, prefer }: { room: string; debug: boolean; prefer?: TransportKind }) {
-  preloadObjects(OBJECTS);
-  const slots = useSlots(OBJECTS.length, "display");
+  /** Module open in the inspector. */
+  const [detail, setDetail] = useState<string | null>(null);
+  const slots = useSlots(OBJECTS.length, "display", detail ? "dock" : "grid");
   const [phases, setPhases] = useState<Record<string, ObjectPhase>>({});
   const [release, setRelease] = useState<ReleaseInfo | null>(null);
   const [lastEvent, setLastEvent] = useState<{ event: HandoffEvent; latency: number } | null>(null);
   const [lastHandoff, setLastHandoff] = useState<{ event: ObjectHandoffEvent; latency: number } | null>(null);
-  /** Object open in the detail view. */
-  const [detail, setDetail] = useState<string | null>(null);
-  const detailRef = useRef<DetailHandle>(null);
+  const detailRef = useRef<InspectorHandle>(null);
   const detailId = useRef<string | null>(null);
   detailId.current = detail;
-  const [justConnected, setJustConnected] = useState(false);
   const handles = useRef<Record<string, ThrowableHandle | null>>({});
   const peerConnected = useRef(false);
 
@@ -40,7 +44,7 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
       setLastHandoff({ event, latency });
     }
     if (event.type === "object_recall" && isKnownObject(event.objectId)) {
-      // Called back while being inspected: zoom back into the slot, then send it.
+      // Called back while being inspected: close the inspector, then send it.
       if (detailId.current === event.objectId) detailRef.current?.close("action");
       else handles.current[event.objectId]?.throwOut();
     }
@@ -59,7 +63,12 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
     },
     [session.send],
   );
-  const onTap = useCallback((id: string) => setDetail(id), []);
+
+  // Tap a module to expand it; tap the expanded one (in the dock) again to collapse.
+  const onTap = useCallback((id: string) => {
+    if (detailId.current === id) detailRef.current?.close();
+    else setDetail(id);
+  }, []);
   const onDetailClosed = useCallback(
     (reason: CloseReason) => {
       const id = detail;
@@ -70,13 +79,10 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
   );
   const canThrow = useCallback(() => peerConnected.current, []);
 
-  // Brief "Controller connected" acknowledgement, then get out of the way.
+  // If the inspected module leaves (flicked down from the dock), drop the inspector.
   useEffect(() => {
-    if (!connected) return;
-    setJustConnected(true);
-    const t = setTimeout(() => setJustConnected(false), 2200);
-    return () => clearTimeout(t);
-  }, [connected]);
+    if (detail && !isHeld(phases[detail])) setDetail(null);
+  }, [detail, phases]);
 
   // Fullscreen with F or a double click on empty space: no browser chrome on the TV.
   useEffect(() => {
@@ -88,7 +94,7 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
       if (e.key === "f" || e.key === "F") toggle();
     };
     const onDbl = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest(".object, button")) toggle();
+      if (!(e.target as HTMLElement).closest(".object, button, .inspector")) toggle();
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("dblclick", onDbl);
@@ -100,33 +106,39 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
 
   const empty = held.length === 0;
   const pairing = !connected && empty;
-  const idleText = justConnected ? "Controller connected" : "Waiting for objects";
-  const detailIndex = detail ? OBJECTS.findIndex((o) => o.id === detail) : -1;
+  const detailSpec = detail ? OBJECTS.find((o) => o.id === detail) : undefined;
+  const vp = slots ? { w: window.innerWidth, h: window.innerHeight } : null;
+
+  const indicators: Indicator[] = [
+    session.status === "open"
+      ? { tone: "ok", label: "SYSTEM ONLINE" }
+      : { tone: session.status === "error" ? "bad" : "wait", label: session.status === "error" ? "LINK ERROR" : "CONNECTING" },
+    connected ? { tone: "ok", label: "CONTROLLER CONNECTED" } : { tone: "wait", label: "CONTROLLER OFFLINE" },
+    { tone: held.length ? "ok" : "wait", label: `ACTIVE MODULES ${held.length}/${OBJECTS.length}` },
+  ];
 
   return (
-    <main className="stage stage-display">
-      <div className="horizon" aria-hidden />
-
-      <header className="chrome-top" data-hidden={pairing}>
-        {session.status === "open" ? (
-          connected ? (
-            <StatusLine tone="ok" text="Connected" />
-          ) : (
-            <StatusLine tone="wait" text={`Controller offline · ${room}`} fadeWhenOk={false} />
-          )
-        ) : (
-          <StatusLine
-            tone={session.status === "error" ? "bad" : "wait"}
-            text={session.status === "error" ? "Connection error" : "Connecting"}
-          />
-        )}
-      </header>
+    <main className="stage stage-display" data-inspecting={Boolean(detail)}>
+      <div className="wall-grid" aria-hidden />
+      <MissionHeader role="display" indicators={indicators} room={connected ? undefined : room} />
 
       <PairingPanel room={room} show={pairing} />
 
       <p className="idle-note" data-show={!pairing && empty}>
-        {idleText}
+        {MISSION.emptyWall}
       </p>
+
+      {detailSpec && vp && (
+        <ModuleInspector
+          key={detailSpec.id}
+          ref={detailRef}
+          spec={detailSpec}
+          region={{ top: headerHeight(vp, "display"), bottom: dockHeight(vp) }}
+          actionLabel="RETURN TO TABLET"
+          actionDisabled={!connected}
+          onClosed={onDetailClosed}
+        />
+      )}
 
       {slots &&
         OBJECTS.map((o, i) => (
@@ -136,6 +148,7 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
               handles.current[o.id] = h;
             }}
             spec={o}
+            role="display"
             slot={slots[i]}
             exitEdge="bottom"
             initiallyPresent={false}
@@ -144,21 +157,9 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
             onTap={onTap}
             onRelease={setRelease}
             onPhase={onPhase}
-            focused={detail === o.id}
+            selected={detail === o.id}
           />
         ))}
-
-      {slots && detailIndex >= 0 && (
-        <DetailView
-          key={detail}
-          ref={detailRef}
-          spec={OBJECTS[detailIndex]}
-          from={slots[detailIndex]}
-          actionLabel="Return to tablet"
-          actionDisabled={!connected}
-          onClosed={onDetailClosed}
-        />
-      )}
 
       {debug && (
         <DebugOverlay
@@ -168,6 +169,7 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
             transport: `${session.kind ?? "…"} · ${session.status}`,
             peer: connected ? `controller (${session.peer.held.length} held)` : "none",
             "on this screen": held.length,
+            inspecting: detail,
             "incoming object": lastHandoff?.event.objectId,
             "incoming speed": lastHandoff ? `${lastHandoff.event.velocity} px/s` : null,
             "incoming vector": fmt.vec(lastHandoff?.event.direction),

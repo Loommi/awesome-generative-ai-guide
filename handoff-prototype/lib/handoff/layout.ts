@@ -9,15 +9,36 @@ export interface Slot {
   h: number;
 }
 
+/** "grid": normal resting layout. "dock": the wall's minimised strip while a module is inspected. */
+export type LayoutMode = "grid" | "dock";
+
 const ASPECT = 1.25; // objects are 4:5
+
+/** Height of the wall's bottom dock strip while inspecting. */
+export function dockHeight(vp: Viewport): number {
+  return Math.round(Math.min(Math.max(vp.h * 0.2, 130), 240));
+}
+
+/** Space reserved for the header on each screen. */
+export function headerHeight(vp: Viewport, role: DeviceRole): number {
+  return role === "controller" ? (vp.h > vp.w ? 128 : 96) : Math.round(Math.min(Math.max(vp.h * 0.11, 72), 150));
+}
 
 /**
  * Resting slots for `count` objects. Portrait screens get a 2-column grid,
- * landscape screens a single row. Leaves room for the status line and hints.
+ * landscape screens a single row. In dock mode (wall only) the objects shrink
+ * into a strip along the bottom edge.
  */
-export function layoutSlots(count: number, vp: Viewport, role: DeviceRole): Slot[] {
-  const top = role === "controller" ? 64 : 48;
-  const bottom = role === "controller" ? 76 : 48;
+export function layoutSlots(count: number, vp: Viewport, role: DeviceRole, mode: LayoutMode = "grid"): Slot[] {
+  if (mode === "dock") {
+    const stripH = dockHeight(vp);
+    const cellW = (vp.w - 32) / count;
+    const h = Math.min(stripH * 0.8, (cellW * 0.5) * ASPECT);
+    const w = h / ASPECT;
+    return Array.from({ length: count }, (_, i) => ({ x: 16 + cellW * (i + 0.5), y: vp.h - stripH / 2, w, h }));
+  }
+  const top = headerHeight(vp, role);
+  const bottom = role === "controller" ? 72 : Math.round(vp.h * 0.08);
   const portrait = vp.h > vp.w * 1.1;
   const cols = portrait ? Math.min(2, count) : count;
   const rows = Math.ceil(count / cols);
@@ -25,8 +46,8 @@ export function layoutSlots(count: number, vp: Viewport, role: DeviceRole): Slot
   const areaH = vp.h - top - bottom;
   const cellW = areaW / cols;
   const cellH = areaH / rows;
-  const fill = role === "display" ? 0.62 : 0.74;
-  const w = Math.min(cellW * fill, (cellH * fill) / ASPECT, role === "display" ? 420 : 340);
+  const fill = role === "display" ? 0.8 : 0.84;
+  const w = Math.min(cellW * fill, (cellH * fill) / ASPECT, role === "display" ? 560 : 360);
   const h = w * ASPECT;
   return Array.from({ length: count }, (_, i) => {
     const r = Math.floor(i / cols);

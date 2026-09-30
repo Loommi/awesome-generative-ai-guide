@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Handoff",
-  description: "Throw an object from a tablet onto a wall display.",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Handoff" },
+  title: "PROXIMA — Mission Command",
+  description: "Transfer mission modules from a portable terminal to the Eos command display.",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "PROXIMA" },
 };
 
 export const viewport: Viewport = {
@@ -13,7 +13,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#050709",
+  themeColor: "#080D14",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

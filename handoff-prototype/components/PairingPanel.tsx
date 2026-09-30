@@ -16,14 +16,15 @@ export function PairingPanel({ room, show }: { room: string; show: boolean }) {
       type: "svg",
       margin: 0,
       errorCorrectionLevel: "M",
-      color: { dark: "#05080a", light: "#00000000" },
+      color: { dark: "#080D14", light: "#00000000" },
     }).then(setSvg, () => setSvg(""));
   }, [room]);
 
   return (
     <section className="pairing" data-show={show} aria-hidden={!show}>
-      <p className="pairing-title">Connect controller</p>
+      <p className="pairing-title">LINK PORTABLE TERMINAL</p>
       <div className="qr" dangerouslySetInnerHTML={{ __html: svg }} />
+      <p className="pairing-label">ROOM CODE</p>
       <p className="room-code">{room}</p>
       <p className="pairing-url">{url.replace(/^https?:\/\//, "")}</p>
     </section>

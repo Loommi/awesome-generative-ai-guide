@@ -17,7 +17,7 @@ export function JoinForm({ debug }: { debug: boolean }) {
           router.push(`/controller?room=${code}${debug ? "&debug=true" : ""}`);
         }}
       >
-        <label htmlFor="room">Room code on the display</label>
+        <label htmlFor="room">Room code on the command display</label>
         <input
           id="room"
           value={code}
@@ -31,7 +31,7 @@ export function JoinForm({ debug }: { debug: boolean }) {
           autoFocus
         />
         <button type="submit" className="ghost-button" disabled={code.length < 3}>
-          Join
+          Link terminal
         </button>
       </form>
     </main>
