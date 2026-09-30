@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { DebugOverlay, fmt } from "./DebugOverlay";
+import { Atmosphere } from "./fx/Atmosphere";
 import { MissionHeader, type Indicator } from "./mission/MissionHeader";
 import { ModuleInspector, type CloseReason, type InspectorHandle } from "./mission/ModuleInspector";
 import { ThrowableObject, type ThrowableHandle } from "./ThrowableObject";
@@ -103,6 +104,7 @@ export function ControllerView({ room, debug, prefer }: { room: string; debug: b
 
   return (
     <main className="stage stage-controller">
+      <Atmosphere role="controller" />
       <MissionHeader role="controller" indicators={[link]} room={room} />
 
       {slots &&

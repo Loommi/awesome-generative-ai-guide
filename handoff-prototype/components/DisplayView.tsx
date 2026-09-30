@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DebugOverlay, fmt } from "./DebugOverlay";
+import { Atmosphere } from "./fx/Atmosphere";
+import { IdleReticle } from "./fx/IdleReticle";
+import { Ticker } from "./fx/Ticker";
 import { MissionHeader, type Indicator } from "./mission/MissionHeader";
 import { ModuleInspector, type CloseReason, type InspectorHandle } from "./mission/ModuleInspector";
 import { PairingPanel } from "./PairingPanel";
@@ -119,11 +122,13 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
 
   return (
     <main className="stage stage-display" data-inspecting={Boolean(detail)}>
+      <Atmosphere role="display" />
       <div className="wall-grid" aria-hidden />
       <MissionHeader role="display" indicators={indicators} room={connected ? undefined : room} />
 
       <PairingPanel room={room} show={pairing} />
 
+      <IdleReticle show={!pairing && empty} />
       <p className="idle-note" data-show={!pairing && empty}>
         {MISSION.emptyWall}
       </p>
@@ -160,6 +165,18 @@ export function DisplayView({ room, debug, prefer }: { room: string; debug: bool
             selected={detail === o.id}
           />
         ))}
+
+      <Ticker
+        show={!detail}
+        items={[
+          `${MISSION.wallTitle} MISSION ARCHIVE`,
+          `LINK ${session.status === "open" ? "NOMINAL" : session.status.toUpperCase()}`,
+          `CONTROLLER ${connected ? "CONNECTED" : "OFFLINE"}`,
+          `ROOM ${room}`,
+          ...OBJECTS.map((o) => `MOD ${o.number} ${o.name} ${held.includes(o.id) ? "ACTIVE" : "STANDBY"}`),
+          `TRANSPORT ${(session.kind ?? "…").toUpperCase()}`,
+        ]}
+      />
 
       {debug && (
         <DebugOverlay

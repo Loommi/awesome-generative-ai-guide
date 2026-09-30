@@ -155,6 +155,18 @@ components/
     AnomalyVisualization.tsx    04: occluded, noise-displaced scope view of the structure
 ```
 
+### Sci-fi effects layer
+
+`components/fx/` holds decoration only; none of it touches the handoff logic:
+
+- `Atmosphere`: static starfield and nebula, scanlines, vignette, a slow scan band, HUD corner brackets and edge ticks.
+- `Decode`: headers, module names and inspector values resolve out of scrambled glyphs.
+- `Ticker`: the wall's bottom telemetry strip. It shows live link/controller/module state and the local clock, not mission data.
+- `IdleReticle`: the radar sweep behind *AWAITING MISSION DATA*.
+- In `ThrowableObject` / CSS: cards carry corner brackets, a scan line and a sheen. In flight a module becomes a striped, flickering hologram with a light trail. On arrival it plays a lock-on burst (flash, rings, brackets, *MODULE RECEIVED / RETRIEVED*).
+
+The starfield is deliberately static: drifting full-screen layers dropped headless Chromium (software compositing, similar to many TV browsers) from 60 to about 22 fps. Keep new full-screen layers static; animate only small elements, with transform/opacity. All of it is disabled under `prefers-reduced-motion`.
+
 ### Assets
 
 There are no image assets. Every visual is inline SVG (viewBox `960×600`, `card` and `full` variants) animated with CSS and SMIL, so nothing is fetched and no dependencies were added. Stars are placed deterministically so server and client renders match. `app/icon.svg` is the favicon. Fonts use system stacks (`--font-sans`, `--font-mono`) and are not downloaded.

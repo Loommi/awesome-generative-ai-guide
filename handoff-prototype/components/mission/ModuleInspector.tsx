@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type Ref } from "react";
 import type { ModuleSpec } from "@/lib/mission/modules";
+import { Decode } from "../fx/Decode";
 import { ModuleVisual } from "./ModuleVisual";
 
 export type CloseReason = "dismiss" | "action";
@@ -64,11 +65,20 @@ export function ModuleInspector({
 
   return (
     <section className="inspector" data-mode={region ? "region" : "full"} data-closing={closing} style={style} aria-label={`${spec.name} — ${spec.title}`}>
+      <span className="insp-scan" aria-hidden />
+      <span className="hud-corner tl" aria-hidden />
+      <span className="hud-corner tr" aria-hidden />
+      <span className="hud-corner bl" aria-hidden />
+      <span className="hud-corner br" aria-hidden />
       <header className="insp-head">
         <div className="insp-id">
           <p className="insp-num">MODULE {spec.number}</p>
-          <h2 className="insp-name">{spec.name}</h2>
-          <p className="insp-title">{spec.title}</p>
+          <h2 className="insp-name">
+            <Decode text={spec.name} delay={120} duration={600} />
+          </h2>
+          <p className="insp-title">
+            <Decode text={spec.title} delay={260} duration={600} />
+          </p>
         </div>
         <div className="insp-actions">
           <button type="button" className="mc-button accent" onClick={() => close("action")} disabled={actionDisabled}>
@@ -81,6 +91,8 @@ export function ModuleInspector({
       </header>
       <div className="insp-body">
         <div className="insp-viz">
+          <div className="insp-viz-grid" aria-hidden />
+          <div className="insp-viz-reticle" aria-hidden />
           <ModuleVisual kind={spec.key} variant="full" />
           <p className="insp-note">{spec.note}</p>
         </div>
@@ -89,7 +101,9 @@ export function ModuleInspector({
             {spec.facts.map((f, i) => (
               <div key={i} style={{ animationDelay: `${160 + i * 70}ms` }}>
                 <dt>{f.label}</dt>
-                <dd data-unresolved={f.unresolved || undefined}>{f.value}</dd>
+                <dd data-unresolved={f.unresolved || undefined}>
+                  <Decode text={f.value} delay={220 + i * 90} duration={520} />
+                </dd>
               </div>
             ))}
           </dl>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useImperativeHandle, type CSSProperties, type Ref } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type Ref } from "react";
 import { moduleStatus, ModulePreview } from "./mission/ModulePreview";
 import type { Edge } from "@/lib/handoff/gesture";
 import type { Slot } from "@/lib/handoff/layout";
@@ -65,6 +65,14 @@ export function ThrowableObject({
 
   useEffect(() => onPhase(spec.id, object.phase), [onPhase, spec.id, object.phase]);
 
+  // Lock-on burst each time the module finishes arriving on this screen.
+  const [landings, setLandings] = useState(0);
+  const lastPhase = useRef(object.phase);
+  useEffect(() => {
+    if (lastPhase.current === "entering" && object.phase === "present") setLandings((n) => n + 1);
+    lastPhase.current = object.phase;
+  }, [object.phase]);
+
   const style = {
     left: slot.x - slot.w / 2,
     top: slot.y - slot.h / 2,
@@ -78,6 +86,7 @@ export function ThrowableObject({
       ref={object.ref}
       className="object"
       data-phase={object.phase}
+      data-role={role}
       data-selected={selected}
       data-object-id={spec.id}
       style={style}
@@ -85,7 +94,17 @@ export function ThrowableObject({
       {...object.handlers}
     >
       <div className="object-glow" aria-hidden />
+      <div className="object-trail" aria-hidden />
       <ModulePreview spec={spec} status={moduleStatus(role, object.phase)} />
+      {landings > 0 && (
+        <div key={landings} className="land-fx" aria-hidden>
+          <span className="lf-flash" />
+          <span className="lf-ring" />
+          <span className="lf-ring lf-ring-2" />
+          <span className="lf-brackets" />
+          <span className="lf-tag">{role === "display" ? "MODULE RECEIVED" : "MODULE RETRIEVED"}</span>
+        </div>
+      )}
     </div>
   );
 }

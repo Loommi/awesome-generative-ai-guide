@@ -256,7 +256,7 @@ button {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 3.5cqw;
+  border-radius: 1.6cqw;
   background: var(--surface);
   border: 1px solid rgba(var(--accent), 0.28);
   box-shadow:
@@ -1252,5 +1252,844 @@ button {
   }
   .object {
     transition: none;
+  }
+}
+
+/* =====================================================================
+   Sci-fi layer: atmosphere, HUD, holograms, arrivals. Decorative only;
+   everything here is switched off under prefers-reduced-motion.
+   ===================================================================== */
+
+/* ---------- Atmosphere ---------- */
+
+.atmo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Static on purpose: drifting full-screen layers cost ~30 fps on software-composited screens (TV browsers). */
+.atmo-stars {
+  position: absolute;
+  inset: 0;
+}
+
+.atmo-stars-far {
+  background-image:
+    radial-gradient(1px 1px at 23px 41px, rgba(233, 240, 245, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 131px 97px, rgba(233, 240, 245, 0.4), transparent 60%),
+    radial-gradient(1px 1px at 187px 12px, rgba(99, 217, 232, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 71px 173px, rgba(233, 240, 245, 0.35), transparent 60%),
+    radial-gradient(1px 1px at 201px 151px, rgba(233, 240, 245, 0.45), transparent 60%);
+  background-size: 220px 220px;
+  opacity: 0.7;
+}
+
+.atmo-stars-mid {
+  background-image:
+    radial-gradient(1.4px 1.4px at 57px 213px, rgba(233, 240, 245, 0.6), transparent 60%),
+    radial-gradient(1.4px 1.4px at 263px 61px, rgba(230, 182, 106, 0.5), transparent 60%),
+    radial-gradient(1.4px 1.4px at 171px 297px, rgba(233, 240, 245, 0.5), transparent 60%);
+  background-size: 330px 330px;
+}
+
+.atmo-stars-near {
+  background-image:
+    radial-gradient(2px 2px at 97px 331px, rgba(233, 240, 245, 0.7), transparent 60%),
+    radial-gradient(1.8px 1.8px at 377px 113px, rgba(99, 217, 232, 0.6), transparent 60%);
+  background-size: 460px 460px;
+}
+
+.atmo-nebula {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(40% 35% at 18% 20%, rgba(99, 217, 232, 0.07), transparent 70%),
+    radial-gradient(35% 40% at 85% 75%, rgba(157, 143, 214, 0.07), transparent 70%),
+    radial-gradient(30% 30% at 70% 10%, rgba(205, 101, 95, 0.04), transparent 70%);
+}
+
+.atmo-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22vh;
+  background: linear-gradient(to bottom, transparent, rgba(99, 217, 232, 0.035) 70%, rgba(99, 217, 232, 0.09) 99%, transparent);
+  animation: band 11s linear infinite;
+}
+
+.atmo-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(233, 240, 245, 0.022) 0 1px, transparent 1px 3px);
+}
+
+.atmo-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* ---------- HUD brackets / ticks ---------- */
+
+.hud-corner {
+  --hc: 22px;
+  --hci: 10px;
+  position: absolute;
+  width: var(--hc);
+  height: var(--hc);
+  border: 0 solid rgba(var(--accent, 99, 217, 232), 0.55);
+  pointer-events: none;
+}
+
+.hud-corner.tl {
+  top: var(--hci);
+  left: var(--hci);
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+.hud-corner.tr {
+  top: var(--hci);
+  right: var(--hci);
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+.hud-corner.bl {
+  bottom: var(--hci);
+  left: var(--hci);
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+.hud-corner.br {
+  bottom: var(--hci);
+  right: var(--hci);
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+.atmo-display .hud-corner {
+  --hc: clamp(22px, 2.4vw, 56px);
+  --hci: clamp(8px, 0.8vw, 20px);
+  border-color: rgba(99, 217, 232, 0.35);
+}
+
+.atmo-controller .hud-corner {
+  --hci: max(6px, env(safe-area-inset-top));
+  border-color: rgba(99, 217, 232, 0.3);
+}
+
+.hud-ticks {
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  width: 10px;
+  background: repeating-linear-gradient(to bottom, rgba(99, 217, 232, 0.35) 0 1px, transparent 1px 22px);
+  -webkit-mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);
+}
+
+.hud-ticks-left {
+  left: clamp(8px, 0.8vw, 20px);
+}
+.hud-ticks-right {
+  right: clamp(8px, 0.8vw, 20px);
+}
+
+.atmo-controller .hud-ticks {
+  display: none;
+}
+
+/* ---------- Header polish ---------- */
+
+.mh-title {
+  text-shadow: 0 0 22px rgba(99, 217, 232, 0.28);
+}
+
+.mh-indicators li {
+  animation: ind-in 420ms ease-out both;
+}
+
+.mh-rule {
+  position: absolute;
+  left: max(22px, env(safe-area-inset-left));
+  right: max(22px, env(safe-area-inset-right));
+  bottom: -14px;
+  height: 1px;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(99, 217, 232, 0.45), rgba(99, 217, 232, 0.08) 40%, rgba(99, 217, 232, 0.08) 70%, rgba(99, 217, 232, 0.3));
+  transform-origin: left;
+  animation: rule-in 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 200ms both;
+}
+
+.mh-rule::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 18%;
+  background: linear-gradient(90deg, transparent, rgba(233, 240, 245, 0.9), transparent);
+  animation: rule-run 5s ease-in-out 1.2s infinite;
+}
+
+.mission-header-display .mh-rule {
+  left: clamp(24px, 2.6vw, 64px);
+  right: clamp(24px, 2.6vw, 64px);
+  bottom: calc(-1 * clamp(10px, 1.4vh, 24px));
+}
+
+.decode {
+  white-space: pre;
+}
+
+/* ---------- Cartridge: frame, scan, sheen, hologram ---------- */
+
+.cart-name {
+  text-shadow: 0 0 3cqw rgba(var(--accent), 0.35);
+}
+
+.cart-art {
+  position: relative;
+}
+
+.cart-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(var(--accent), 0.05) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+
+.cart-frame {
+  position: absolute;
+  inset: 1.4cqw;
+  pointer-events: none;
+  --b: rgba(var(--accent), 0.7);
+  background:
+    linear-gradient(var(--b) 0 0) top left / 5cqw 1.5px no-repeat,
+    linear-gradient(var(--b) 0 0) top left / 1.5px 5cqw no-repeat,
+    linear-gradient(var(--b) 0 0) top right / 5cqw 1.5px no-repeat,
+    linear-gradient(var(--b) 0 0) top right / 1.5px 5cqw no-repeat,
+    linear-gradient(var(--b) 0 0) bottom left / 5cqw 1.5px no-repeat,
+    linear-gradient(var(--b) 0 0) bottom left / 1.5px 5cqw no-repeat,
+    linear-gradient(var(--b) 0 0) bottom right / 5cqw 1.5px no-repeat,
+    linear-gradient(var(--b) 0 0) bottom right / 1.5px 5cqw no-repeat;
+  opacity: 0.55;
+  transition: opacity 200ms ease;
+}
+
+.object[data-phase="dragging"] .cart-frame,
+.object[data-selected="true"] .cart-frame {
+  opacity: 1;
+}
+
+/* A thin scan line that walks down each card, staggered per module. */
+.cart-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1.2cqw;
+  background: linear-gradient(to bottom, transparent, rgba(var(--accent), 0.55), transparent);
+  box-shadow: 0 0 4cqw rgba(var(--accent), 0.3);
+  opacity: 0;
+  pointer-events: none;
+  animation: cart-scan 9s linear infinite;
+  animation-delay: calc(var(--i, 1) * -2.2s);
+}
+
+.cart-sheen {
+  position: absolute;
+  inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 42%, rgba(233, 240, 245, 0.09) 48%, rgba(var(--accent), 0.16) 50%, rgba(233, 240, 245, 0.09) 52%, transparent 58%);
+  transform: translateX(-60%);
+  pointer-events: none;
+}
+
+.object[data-phase="dragging"] .cart-sheen,
+.object[data-selected="true"] .cart-sheen {
+  animation: sheen 1.6s ease-in-out infinite;
+}
+
+/* In flight the module turns to hologram: striped, flickering, over-bright edges. */
+.cart-holo {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgba(var(--accent), 0.22) 0 2px, transparent 2px 5px),
+    linear-gradient(to bottom, rgba(var(--accent), 0.12), rgba(var(--accent), 0.02));
+  background-size:
+    100% 10px,
+    100% 100%;
+  transition: opacity 180ms ease;
+}
+
+.object[data-phase="entering"] .cart-holo,
+.object[data-phase="exiting"] .cart-holo {
+  opacity: 1;
+  animation: holo-roll 0.4s linear infinite;
+}
+
+.object[data-phase="entering"] .cart,
+.object[data-phase="exiting"] .cart {
+  border-color: rgba(var(--accent), 0.95);
+  box-shadow:
+    0 0 6cqw rgba(var(--accent), 0.45),
+    inset 0 0 6cqw rgba(var(--accent), 0.2);
+  animation: holo-flicker 0.18s steps(2) infinite;
+}
+
+/* Light trail behind a module in flight. */
+.object-trail {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  height: 90%;
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(8px);
+  transition: opacity 120ms ease;
+}
+
+/* Moving up: trail below. */
+.object[data-role="controller"][data-phase="exiting"] .object-trail,
+.object[data-role="display"][data-phase="entering"] .object-trail {
+  top: 92%;
+  background: linear-gradient(to bottom, rgba(var(--accent), 0.55), transparent);
+  opacity: 1;
+}
+
+/* Moving down: trail above. */
+.object[data-role="controller"][data-phase="entering"] .object-trail,
+.object[data-role="display"][data-phase="exiting"] .object-trail {
+  bottom: 92%;
+  background: linear-gradient(to top, rgba(var(--accent), 0.55), transparent);
+  opacity: 1;
+}
+
+/* ---------- Arrival lock-on ---------- */
+
+.land-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.lf-flash {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.6cqw;
+  border: 2px solid rgba(var(--accent), 1);
+  background: rgba(var(--accent), 0.18);
+  box-shadow:
+    0 0 10cqw rgba(var(--accent), 0.6),
+    inset 0 0 8cqw rgba(var(--accent), 0.35);
+  animation: lf-flash 700ms ease-out forwards;
+}
+
+.lf-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70cqw;
+  height: 70cqw;
+  margin: -35cqw 0 0 -35cqw;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--accent), 0.9);
+  animation: lf-ring 800ms cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+
+.lf-ring-2 {
+  border-width: 1px;
+  border-style: dashed;
+  animation-delay: 120ms;
+  animation-duration: 1000ms;
+  opacity: 0;
+}
+
+.lf-brackets {
+  position: absolute;
+  inset: -5cqw;
+  --b: rgba(var(--accent), 1);
+  background:
+    linear-gradient(var(--b) 0 0) top left / 10cqw 2px no-repeat,
+    linear-gradient(var(--b) 0 0) top left / 2px 10cqw no-repeat,
+    linear-gradient(var(--b) 0 0) top right / 10cqw 2px no-repeat,
+    linear-gradient(var(--b) 0 0) top right / 2px 10cqw no-repeat,
+    linear-gradient(var(--b) 0 0) bottom left / 10cqw 2px no-repeat,
+    linear-gradient(var(--b) 0 0) bottom left / 2px 10cqw no-repeat,
+    linear-gradient(var(--b) 0 0) bottom right / 10cqw 2px no-repeat,
+    linear-gradient(var(--b) 0 0) bottom right / 2px 10cqw no-repeat;
+  filter: drop-shadow(0 0 2cqw rgba(var(--accent), 0.8));
+  animation: lf-brackets 1300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.lf-tag {
+  position: absolute;
+  left: 50%;
+  top: calc(-5cqw - max(20px, 6cqw));
+  transform: translateX(-50%);
+  padding: 0.35em 0.9em;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: max(10px, 3.4cqw);
+  letter-spacing: 0.28em;
+  color: rgb(var(--accent));
+  background: rgba(8, 13, 20, 0.85);
+  border: 1px solid rgba(var(--accent), 0.7);
+  box-shadow: 0 0 3cqw rgba(var(--accent), 0.35);
+  animation: lf-tag 1700ms ease forwards;
+}
+
+/* ---------- Tablet docks ---------- */
+
+.dock-slot {
+  overflow: hidden;
+}
+
+.dock-slot::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 30%;
+  background: linear-gradient(to bottom, transparent, rgba(var(--accent), 0.18), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dock-slot[data-show="true"]::after {
+  animation: dock-scan 3.2s ease-in-out 0.6s infinite;
+}
+
+.dock-slot[data-retrieving] {
+  border-style: solid;
+  border-color: rgba(230, 182, 106, 0.8);
+  box-shadow: inset 0 0 30px rgba(230, 182, 106, 0.15);
+}
+
+/* ---------- Buttons ---------- */
+
+.mc-button {
+  position: relative;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.mc-button.accent {
+  background: rgba(var(--accent), 0.06);
+}
+
+.mc-button.accent:hover:not(:disabled) {
+  box-shadow: inset 0 0 18px rgba(var(--accent), 0.35);
+  text-shadow: 0 0 10px rgba(var(--accent), 0.8);
+}
+
+/* ---------- Inspector ---------- */
+
+.inspector {
+  box-shadow:
+    0 0 0 1px rgba(var(--accent), 0.08),
+    0 0 80px rgba(var(--accent), 0.08);
+}
+
+.inspector .hud-corner {
+  --hc: clamp(18px, 1.8vw, 40px);
+  --hci: -1px;
+  border-color: rgba(var(--accent), 0.9);
+}
+
+.inspector[data-mode="full"] .hud-corner {
+  --hci: 6px;
+}
+
+.insp-scan {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgb(var(--accent)), transparent);
+  box-shadow: 0 0 24px 4px rgba(var(--accent), 0.45);
+  pointer-events: none;
+  animation: insp-scan 1100ms cubic-bezier(0.3, 0.6, 0.3, 1) 80ms both;
+}
+
+.insp-name {
+  text-shadow: 0 0 30px rgba(var(--accent), 0.35);
+}
+
+.insp-viz {
+  overflow: hidden;
+}
+
+.insp-viz-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(var(--accent), 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--accent), 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent);
+  mask-image: radial-gradient(closest-side, #000 40%, transparent);
+  animation: grid-in 900ms ease-out both;
+}
+
+.insp-viz-reticle {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(78%, 64vh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(var(--accent), 0.16);
+  box-shadow:
+    0 0 0 3vh rgba(var(--accent), 0.015),
+    inset 0 0 12vh rgba(var(--accent), 0.05);
+  animation: reticle-spin 80s linear infinite;
+}
+
+/* ---------- Wall empty state ---------- */
+
+.idle-reticle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(72vh, 60vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 600ms ease;
+}
+
+.idle-reticle[data-show="false"] {
+  opacity: 0;
+}
+
+.idle-reticle svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.idle-spin,
+.idle-spin-rev,
+.idle-sweep {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.idle-spin {
+  animation: spin 90s linear infinite;
+}
+
+.idle-spin-rev {
+  animation: spin 50s linear infinite reverse;
+}
+
+.idle-sweep {
+  animation: spin 6s linear infinite;
+}
+
+.idle-note {
+  text-shadow: 0 0 18px rgba(99, 217, 232, 0.35);
+}
+
+/* ---------- Pairing ---------- */
+
+.pairing {
+  z-index: 2;
+  background: rgba(16, 26, 38, 0.82);
+  border-color: rgba(99, 217, 232, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(99, 217, 232, 0.06),
+    0 0 90px rgba(99, 217, 232, 0.1);
+}
+
+.qr {
+  position: relative;
+  overflow: hidden;
+}
+
+.qr::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: rgba(99, 217, 232, 0.9);
+  box-shadow: 0 0 18px 4px rgba(99, 217, 232, 0.6);
+  animation: qr-scan 2.6s ease-in-out infinite alternate;
+}
+
+/* ---------- Ticker ---------- */
+
+.ticker {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 1.6em;
+  height: clamp(26px, 2.8vh, 56px);
+  padding: 0 clamp(24px, 2.6vw, 64px);
+  border-top: 1px solid rgba(99, 217, 232, 0.14);
+  background: linear-gradient(to top, rgba(8, 13, 20, 0.95), rgba(8, 13, 20, 0.6));
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.72vw, 17px);
+  letter-spacing: 0.22em;
+  color: var(--text-dim);
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.ticker[data-show="false"] {
+  opacity: 0;
+}
+
+.ticker-label {
+  color: var(--cyan);
+}
+
+.ticker-label::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-right: 0.8em;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0.8em var(--cyan);
+  animation: blink 1.6s ease-in-out infinite;
+}
+
+.ticker-track {
+  flex: 1;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+.ticker-run {
+  display: flex;
+  width: max-content;
+  animation: ticker 60s linear infinite;
+}
+
+.ticker-run span {
+  padding-right: 6em;
+  white-space: nowrap;
+}
+
+.ticker-clock {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Keyframes (sci-fi layer) ---------- */
+
+@keyframes band {
+  from {
+    transform: translateY(-25vh);
+  }
+  to {
+    transform: translateY(110vh);
+  }
+}
+@keyframes ind-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+@keyframes rule-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes rule-run {
+  from {
+    transform: translateX(-120%);
+  }
+  60%,
+  to {
+    transform: translateX(620%);
+  }
+}
+@keyframes cart-scan {
+  0% {
+    top: -2%;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  22% {
+    top: 100%;
+    opacity: 0.6;
+  }
+  23%,
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+@keyframes sheen {
+  to {
+    transform: translateX(60%);
+  }
+}
+@keyframes holo-roll {
+  to {
+    background-position:
+      0 10px,
+      0 0;
+  }
+}
+@keyframes holo-flicker {
+  50% {
+    opacity: 0.82;
+  }
+}
+@keyframes lf-flash {
+  to {
+    opacity: 0;
+    box-shadow:
+      0 0 0 rgba(var(--accent), 0),
+      inset 0 0 0 rgba(var(--accent), 0);
+  }
+}
+@keyframes lf-ring {
+  from {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+@keyframes lf-brackets {
+  0% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.4;
+  }
+  55% {
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.04);
+    opacity: 0;
+  }
+}
+@keyframes lf-tag {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  15%,
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+}
+@keyframes dock-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(340%);
+    opacity: 0;
+  }
+}
+@keyframes insp-scan {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+@keyframes grid-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+@keyframes reticle-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+@keyframes qr-scan {
+  from {
+    top: 0;
+  }
+  to {
+    top: calc(100% - 3px);
+  }
+}
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmo *,
+  .mh-rule,
+  .mh-rule::after,
+  .mh-indicators li,
+  .cart-scan,
+  .cart-sheen,
+  .cart-holo,
+  .object .cart,
+  .dock-slot::after,
+  .insp-viz-grid,
+  .insp-viz-reticle,
+  .idle-reticle *,
+  .qr::after,
+  .ticker-run,
+  .ticker-label::before {
+    animation: none !important;
+  }
+  .land-fx,
+  .insp-scan,
+  .cart-scan,
+  .object-trail {
+    display: none;
   }
 }

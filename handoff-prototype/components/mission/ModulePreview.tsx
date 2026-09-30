@@ -23,7 +23,7 @@ export function moduleStatus(role: DeviceRole, phase: ObjectPhase): { label: str
  */
 export function ModulePreview({ spec, status }: { spec: ModuleSpec; status: { label: string; tone: StatusTone } }) {
   return (
-    <div className="cart" style={{ "--accent": spec.accent } as CSSProperties}>
+    <div className="cart" style={{ "--accent": spec.accent, "--i": Number(spec.number) } as CSSProperties}>
       <div className="cart-top">
         <span className="cart-num">MOD {spec.number}</span>
         <span className="cart-status" data-tone={status.tone}>
@@ -47,6 +47,10 @@ export function ModulePreview({ spec, status }: { spec: ModuleSpec; status: { la
           </div>
         ))}
       </dl>
+      <span className="cart-scan" aria-hidden />
+      <span className="cart-holo" aria-hidden />
+      <span className="cart-sheen" aria-hidden />
+      <span className="cart-frame" aria-hidden />
     </div>
   );
 }
