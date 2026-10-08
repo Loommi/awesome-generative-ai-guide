@@ -62,7 +62,6 @@ function useLionMaterials(
         emissiveIntensity: 1.8,
         toneMapped: false,
       }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     };
   }, [colorPrimary, colorSecondary, colorAccent]);
 }
@@ -126,7 +125,6 @@ const LEG_ATTACH = {
 export interface LionModelProps {
   id: LionId;
   role: LionRole;
-  name: string;
   colorPrimary: string;
   colorSecondary: string;
   colorAccent: string;
@@ -137,7 +135,6 @@ export interface LionModelProps {
 export function LionModel({
   id,
   role,
-  name,
   colorPrimary,
   colorSecondary,
   colorAccent,
@@ -182,10 +179,18 @@ export function LionModel({
   const emblemRef = useRef<THREE.Group>(null);
   const buckleRef = useRef<THREE.Group>(null);
 
-  const legFL = { hip: useRef<THREE.Group>(null), knee: useRef<THREE.Group>(null), paw: useRef<THREE.Group>(null) };
-  const legFR = { hip: useRef<THREE.Group>(null), knee: useRef<THREE.Group>(null), paw: useRef<THREE.Group>(null) };
-  const legBL = { hip: useRef<THREE.Group>(null), knee: useRef<THREE.Group>(null), paw: useRef<THREE.Group>(null) };
-  const legBR = { hip: useRef<THREE.Group>(null), knee: useRef<THREE.Group>(null), paw: useRef<THREE.Group>(null) };
+  const legFLHip = useRef<THREE.Group>(null);
+  const legFLKnee = useRef<THREE.Group>(null);
+  const legFLPaw = useRef<THREE.Group>(null);
+  const legFRHip = useRef<THREE.Group>(null);
+  const legFRKnee = useRef<THREE.Group>(null);
+  const legFRPaw = useRef<THREE.Group>(null);
+  const legBLHip = useRef<THREE.Group>(null);
+  const legBLKnee = useRef<THREE.Group>(null);
+  const legBLPaw = useRef<THREE.Group>(null);
+  const legBRHip = useRef<THREE.Group>(null);
+  const legBRKnee = useRef<THREE.Group>(null);
+  const legBRPaw = useRef<THREE.Group>(null);
   const tailS1 = useRef<THREE.Group>(null);
   const tailS2 = useRef<THREE.Group>(null);
   const tailS3 = useRef<THREE.Group>(null);
@@ -207,18 +212,18 @@ export function LionModel({
       neckRef.current &&
       headRef.current &&
       jawRef.current &&
-      legFL.hip.current &&
-      legFL.knee.current &&
-      legFL.paw.current &&
-      legFR.hip.current &&
-      legFR.knee.current &&
-      legFR.paw.current &&
-      legBL.hip.current &&
-      legBL.knee.current &&
-      legBL.paw.current &&
-      legBR.hip.current &&
-      legBR.knee.current &&
-      legBR.paw.current &&
+      legFLHip.current &&
+      legFLKnee.current &&
+      legFLPaw.current &&
+      legFRHip.current &&
+      legFRKnee.current &&
+      legFRPaw.current &&
+      legBLHip.current &&
+      legBLKnee.current &&
+      legBLPaw.current &&
+      legBRHip.current &&
+      legBRKnee.current &&
+      legBRPaw.current &&
       tailS1.current &&
       tailS2.current &&
       tailS3.current
@@ -230,10 +235,10 @@ export function LionModel({
         neck: neckRef.current,
         head: headRef.current,
         jaw: jawRef.current,
-        legFL: { hip: legFL.hip.current, knee: legFL.knee.current, paw: legFL.paw.current },
-        legFR: { hip: legFR.hip.current, knee: legFR.knee.current, paw: legFR.paw.current },
-        legBL: { hip: legBL.hip.current, knee: legBL.knee.current, paw: legBL.paw.current },
-        legBR: { hip: legBR.hip.current, knee: legBR.knee.current, paw: legBR.paw.current },
+        legFL: { hip: legFLHip.current, knee: legFLKnee.current, paw: legFLPaw.current },
+        legFR: { hip: legFRHip.current, knee: legFRKnee.current, paw: legFRPaw.current },
+        legBL: { hip: legBLHip.current, knee: legBLKnee.current, paw: legBLPaw.current },
+        legBR: { hip: legBRHip.current, knee: legBRKnee.current, paw: legBRPaw.current },
         tail: [tailS1.current, tailS2.current, tailS3.current],
         chestEmblem: emblemRef.current ?? undefined,
         starBuckle: buckleRef.current ?? undefined,
@@ -284,19 +289,19 @@ export function LionModel({
       jawRef.current.rotation.x = state.jaw.rx;
     }
     const legs = [
-      [legFL, state.legFL],
-      [legFR, state.legFR],
-      [legBL, state.legBL],
-      [legBR, state.legBR],
+      [legFLHip, legFLKnee, legFLPaw, state.legFL],
+      [legFRHip, legFRKnee, legFRPaw, state.legFR],
+      [legBLHip, legBLKnee, legBLPaw, state.legBL],
+      [legBRHip, legBRKnee, legBRPaw, state.legBR],
     ] as const;
-    for (const [refs, s] of legs) {
-      refs.hip.current?.rotation.set(
+    for (const [hip, knee, paw, s] of legs) {
+      hip.current?.rotation.set(
         s.hip.rx + (idleOn ? idleSway * 0.3 : 0),
         s.hip.ry,
         s.hip.rz,
       );
-      refs.knee.current?.rotation.set(s.knee.rx, s.knee.ry, s.knee.rz);
-      refs.paw.current?.rotation.set(s.paw.rx, s.paw.ry, s.paw.rz);
+      knee.current?.rotation.set(s.knee.rx, s.knee.ry, s.knee.rz);
+      paw.current?.rotation.set(s.paw.rx, s.paw.ry, s.paw.rz);
     }
     tailS1.current?.rotation.set(
       state.tail.s1.rx + (idleOn ? idleSway : 0),
@@ -403,10 +408,10 @@ export function LionModel({
           </group>
         </group>
 
-        <LegUnit attach={LEG_ATTACH.FL} materials={materials} hipRef={legFL.hip} kneeRef={legFL.knee} pawRef={legFL.paw} />
-        <LegUnit attach={LEG_ATTACH.FR} materials={materials} hipRef={legFR.hip} kneeRef={legFR.knee} pawRef={legFR.paw} />
-        <LegUnit attach={LEG_ATTACH.BL} materials={materials} hipRef={legBL.hip} kneeRef={legBL.knee} pawRef={legBL.paw} />
-        <LegUnit attach={LEG_ATTACH.BR} materials={materials} hipRef={legBR.hip} kneeRef={legBR.knee} pawRef={legBR.paw} />
+        <LegUnit attach={LEG_ATTACH.FL} materials={materials} hipRef={legFLHip} kneeRef={legFLKnee} pawRef={legFLPaw} />
+        <LegUnit attach={LEG_ATTACH.FR} materials={materials} hipRef={legFRHip} kneeRef={legFRKnee} pawRef={legFRPaw} />
+        <LegUnit attach={LEG_ATTACH.BL} materials={materials} hipRef={legBLHip} kneeRef={legBLKnee} pawRef={legBLPaw} />
+        <LegUnit attach={LEG_ATTACH.BR} materials={materials} hipRef={legBRHip} kneeRef={legBRKnee} pawRef={legBRPaw} />
 
         <group ref={tailS1} position={[0, 0.3, -1.1]}>
           <mesh geometry={geo.tailSeg1} material={materials.primary} position={[0, 0, -0.27]} rotation={[Math.PI / 2, 0, 0]} />

@@ -131,22 +131,22 @@ function legRobotPose(mirror: number): PoseData {
     head: { pos: [0, 0, 0], rot: [100 * DEG, 0, 0] },
     jaw: 22 * DEG,
     legFL: {
-      hip: { pos: [0.68, 0.55, 0.85], rot: [-90 * DEG, 0, -65 * DEG] },
+      hip: { pos: [0.68, 0.55, 0.85], rot: [-90 * DEG, 0, mirror * -65 * DEG] },
       knee: { rot: [100 * DEG, 0, 0] },
       paw: { rot: [-10 * DEG, 0, 0] },
     },
     legFR: {
-      hip: { pos: [-0.68, 0.55, 0.85], rot: [-90 * DEG, 0, -65 * DEG] },
+      hip: { pos: [-0.68, 0.55, 0.85], rot: [-90 * DEG, 0, mirror * -65 * DEG] },
       knee: { rot: [100 * DEG, 0, 0] },
       paw: { rot: [-10 * DEG, 0, 0] },
     },
     legBL: {
-      hip: { pos: [0.68, 0.55, -0.85], rot: [95 * DEG, 0, 70 * DEG] },
+      hip: { pos: [0.68, 0.55, -0.85], rot: [95 * DEG, 0, mirror * 70 * DEG] },
       knee: { rot: [-105 * DEG, 0, 0] },
       paw: { rot: [15 * DEG, 0, 0] },
     },
     legBR: {
-      hip: { pos: [-0.68, 0.55, -0.85], rot: [95 * DEG, 0, 70 * DEG] },
+      hip: { pos: [-0.68, 0.55, -0.85], rot: [95 * DEG, 0, mirror * 70 * DEG] },
       knee: { rot: [-105 * DEG, 0, 0] },
       paw: { rot: [15 * DEG, 0, 0] },
     },
