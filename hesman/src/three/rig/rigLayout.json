@@ -1,0 +1,1173 @@
+{
+ "black": {
+  "role": "torso",
+  "layout": "command",
+  "body": {
+   "center": [
+    0.0,
+    1.55,
+    0.0
+   ],
+   "size": [
+    1.5,
+    1.1,
+    3.2
+   ]
+  },
+  "headScale": 1.5,
+  "legScale": 1.22,
+  "pivots": [
+   {
+    "name": "root",
+    "parent": null,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "body",
+    "parent": "root",
+    "pos": [
+     0.0,
+     1.55,
+     0.0
+    ]
+   },
+   {
+    "name": "neck",
+    "parent": "root",
+    "pos": [
+     0,
+     2.18,
+     1.55
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck",
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "jaw",
+    "parent": "head",
+    "pos": [
+     0,
+     -0.255,
+     0.6
+    ]
+   },
+   {
+    "name": "tail_1",
+    "parent": "root",
+    "pos": [
+     0,
+     1.92,
+     -1.58
+    ]
+   },
+   {
+    "name": "tail_2",
+    "parent": "tail_1",
+    "pos": [
+     0,
+     0.15,
+     -0.6
+    ]
+   },
+   {
+    "name": "tail_3",
+    "parent": "tail_2",
+    "pos": [
+     0,
+     0.2,
+     -0.55
+    ]
+   },
+   {
+    "name": "hip_FL",
+    "parent": "root",
+    "pos": [
+     0.8,
+     1.45,
+     1.05
+    ]
+   },
+   {
+    "name": "knee_FL",
+    "parent": "hip_FL",
+    "pos": [
+     0,
+     -0.72,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FL",
+    "parent": "knee_FL",
+    "pos": [
+     0,
+     -0.55,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BL",
+    "parent": "root",
+    "pos": [
+     0.8,
+     1.5,
+     -1.1
+    ]
+   },
+   {
+    "name": "knee_BL",
+    "parent": "hip_BL",
+    "pos": [
+     0,
+     -0.72,
+     0.14
+    ]
+   },
+   {
+    "name": "paw_BL",
+    "parent": "knee_BL",
+    "pos": [
+     0,
+     -0.6,
+     -0.18
+    ]
+   },
+   {
+    "name": "hip_FR",
+    "parent": "root",
+    "pos": [
+     -0.8,
+     1.45,
+     1.05
+    ]
+   },
+   {
+    "name": "knee_FR",
+    "parent": "hip_FR",
+    "pos": [
+     0,
+     -0.72,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FR",
+    "parent": "knee_FR",
+    "pos": [
+     0,
+     -0.55,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BR",
+    "parent": "root",
+    "pos": [
+     -0.8,
+     1.5,
+     -1.1
+    ]
+   },
+   {
+    "name": "knee_BR",
+    "parent": "hip_BR",
+    "pos": [
+     0,
+     -0.72,
+     0.14
+    ]
+   },
+   {
+    "name": "paw_BR",
+    "parent": "knee_BR",
+    "pos": [
+     0,
+     -0.6,
+     -0.18
+    ]
+   },
+   {
+    "name": "fin_L",
+    "parent": "root",
+    "pos": [
+     0.62,
+     2.2,
+     1.1
+    ]
+   },
+   {
+    "name": "fin_R",
+    "parent": "root",
+    "pos": [
+     -0.62,
+     2.2,
+     1.1
+    ]
+   },
+   {
+    "name": "ext_head",
+    "parent": "root",
+    "pos": [
+     0,
+     1.5,
+     0.1
+    ]
+   },
+   {
+    "name": "ext_emblem",
+    "parent": "root",
+    "pos": [
+     0,
+     1.18,
+     0.5
+    ]
+   },
+   {
+    "name": "ext_collar",
+    "parent": "root",
+    "pos": [
+     0,
+     1.26,
+     1.32
+    ]
+   },
+   {
+    "name": "att_shoulder_L",
+    "parent": "root",
+    "pos": [
+     1.05,
+     1.5,
+     1.05
+    ]
+   },
+   {
+    "name": "att_shoulder_R",
+    "parent": "root",
+    "pos": [
+     -1.05,
+     1.5,
+     1.05
+    ]
+   },
+   {
+    "name": "att_hip_L",
+    "parent": "root",
+    "pos": [
+     0.62,
+     1.45,
+     -1.72
+    ]
+   },
+   {
+    "name": "att_hip_R",
+    "parent": "root",
+    "pos": [
+     -0.62,
+     1.45,
+     -1.72
+    ]
+   }
+  ]
+ },
+ "red": {
+  "role": "armR",
+  "layout": "standard",
+  "body": {
+   "center": [
+    0.0,
+    1.2,
+    0.0
+   ],
+   "size": [
+    1.1,
+    0.84,
+    2.4
+   ]
+  },
+  "headScale": 1.2,
+  "legScale": 1.0,
+  "pivots": [
+   {
+    "name": "root",
+    "parent": null,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "body",
+    "parent": "root",
+    "pos": [
+     0.0,
+     1.2,
+     0.0
+    ]
+   },
+   {
+    "name": "neck",
+    "parent": "root",
+    "pos": [
+     0,
+     1.68,
+     1.15
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck",
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "jaw",
+    "parent": "head",
+    "pos": [
+     0,
+     -0.204,
+     0.48
+    ]
+   },
+   {
+    "name": "tail_1",
+    "parent": "root",
+    "pos": [
+     0,
+     1.48,
+     -1.18
+    ]
+   },
+   {
+    "name": "tail_2",
+    "parent": "tail_1",
+    "pos": [
+     0,
+     0.12,
+     -0.5
+    ]
+   },
+   {
+    "name": "tail_3",
+    "parent": "tail_2",
+    "pos": [
+     0,
+     0.16,
+     -0.45
+    ]
+   },
+   {
+    "name": "hip_FL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FL",
+    "parent": "hip_FL",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FL",
+    "parent": "knee_FL",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BL",
+    "parent": "hip_BL",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BL",
+    "parent": "knee_BL",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "hip_FR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FR",
+    "parent": "hip_FR",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FR",
+    "parent": "knee_FR",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BR",
+    "parent": "hip_BR",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BR",
+    "parent": "knee_BR",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "ext_fist",
+    "parent": "root",
+    "pos": [
+     0,
+     1.2,
+     -0.35
+    ]
+   },
+   {
+    "name": "mount",
+    "parent": "root",
+    "pos": [
+     0,
+     0.74,
+     0.7
+    ]
+   }
+  ]
+ },
+ "green": {
+  "role": "armL",
+  "layout": "standard",
+  "body": {
+   "center": [
+    0.0,
+    1.2,
+    0.0
+   ],
+   "size": [
+    1.1,
+    0.84,
+    2.4
+   ]
+  },
+  "headScale": 1.2,
+  "legScale": 1.0,
+  "pivots": [
+   {
+    "name": "root",
+    "parent": null,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "body",
+    "parent": "root",
+    "pos": [
+     0.0,
+     1.2,
+     0.0
+    ]
+   },
+   {
+    "name": "neck",
+    "parent": "root",
+    "pos": [
+     0,
+     1.68,
+     1.15
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck",
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "jaw",
+    "parent": "head",
+    "pos": [
+     0,
+     -0.204,
+     0.48
+    ]
+   },
+   {
+    "name": "tail_1",
+    "parent": "root",
+    "pos": [
+     0,
+     1.48,
+     -1.18
+    ]
+   },
+   {
+    "name": "tail_2",
+    "parent": "tail_1",
+    "pos": [
+     0,
+     0.12,
+     -0.5
+    ]
+   },
+   {
+    "name": "tail_3",
+    "parent": "tail_2",
+    "pos": [
+     0,
+     0.16,
+     -0.45
+    ]
+   },
+   {
+    "name": "hip_FL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FL",
+    "parent": "hip_FL",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FL",
+    "parent": "knee_FL",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BL",
+    "parent": "hip_BL",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BL",
+    "parent": "knee_BL",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "hip_FR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FR",
+    "parent": "hip_FR",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FR",
+    "parent": "knee_FR",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BR",
+    "parent": "hip_BR",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BR",
+    "parent": "knee_BR",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "ext_fist",
+    "parent": "root",
+    "pos": [
+     0,
+     1.2,
+     -0.35
+    ]
+   },
+   {
+    "name": "mount",
+    "parent": "root",
+    "pos": [
+     0,
+     0.74,
+     0.7
+    ]
+   }
+  ]
+ },
+ "blue": {
+  "role": "legL",
+  "layout": "standard",
+  "body": {
+   "center": [
+    0.0,
+    1.2,
+    0.0
+   ],
+   "size": [
+    1.1,
+    0.84,
+    2.4
+   ]
+  },
+  "headScale": 1.2,
+  "legScale": 1.0,
+  "pivots": [
+   {
+    "name": "root",
+    "parent": null,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "body",
+    "parent": "root",
+    "pos": [
+     0.0,
+     1.2,
+     0.0
+    ]
+   },
+   {
+    "name": "neck",
+    "parent": "root",
+    "pos": [
+     0,
+     1.68,
+     1.15
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck",
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "jaw",
+    "parent": "head",
+    "pos": [
+     0,
+     -0.204,
+     0.48
+    ]
+   },
+   {
+    "name": "tail_1",
+    "parent": "root",
+    "pos": [
+     0,
+     1.48,
+     -1.18
+    ]
+   },
+   {
+    "name": "tail_2",
+    "parent": "tail_1",
+    "pos": [
+     0,
+     0.12,
+     -0.5
+    ]
+   },
+   {
+    "name": "tail_3",
+    "parent": "tail_2",
+    "pos": [
+     0,
+     0.16,
+     -0.45
+    ]
+   },
+   {
+    "name": "hip_FL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FL",
+    "parent": "hip_FL",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FL",
+    "parent": "knee_FL",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BL",
+    "parent": "hip_BL",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BL",
+    "parent": "knee_BL",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "hip_FR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FR",
+    "parent": "hip_FR",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FR",
+    "parent": "knee_FR",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BR",
+    "parent": "hip_BR",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BR",
+    "parent": "knee_BR",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "robot_knee",
+    "parent": "root",
+    "pos": [
+     0,
+     1.2,
+     -0.95
+    ]
+   },
+   {
+    "name": "ext_thigh",
+    "parent": "robot_knee",
+    "pos": [
+     0,
+     0,
+     1.25
+    ]
+   },
+   {
+    "name": "mount",
+    "parent": "ext_thigh",
+    "pos": [
+     0,
+     0,
+     -1.42
+    ]
+   }
+  ]
+ },
+ "orange": {
+  "role": "legR",
+  "layout": "standard",
+  "body": {
+   "center": [
+    0.0,
+    1.2,
+    0.0
+   ],
+   "size": [
+    1.1,
+    0.84,
+    2.4
+   ]
+  },
+  "headScale": 1.2,
+  "legScale": 1.0,
+  "pivots": [
+   {
+    "name": "root",
+    "parent": null,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "body",
+    "parent": "root",
+    "pos": [
+     0.0,
+     1.2,
+     0.0
+    ]
+   },
+   {
+    "name": "neck",
+    "parent": "root",
+    "pos": [
+     0,
+     1.68,
+     1.15
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck",
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "jaw",
+    "parent": "head",
+    "pos": [
+     0,
+     -0.204,
+     0.48
+    ]
+   },
+   {
+    "name": "tail_1",
+    "parent": "root",
+    "pos": [
+     0,
+     1.48,
+     -1.18
+    ]
+   },
+   {
+    "name": "tail_2",
+    "parent": "tail_1",
+    "pos": [
+     0,
+     0.12,
+     -0.5
+    ]
+   },
+   {
+    "name": "tail_3",
+    "parent": "tail_2",
+    "pos": [
+     0,
+     0.16,
+     -0.45
+    ]
+   },
+   {
+    "name": "hip_FL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FL",
+    "parent": "hip_FL",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FL",
+    "parent": "knee_FL",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BL",
+    "parent": "root",
+    "pos": [
+     0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BL",
+    "parent": "hip_BL",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BL",
+    "parent": "knee_BL",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "hip_FR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.15,
+     0.8
+    ]
+   },
+   {
+    "name": "knee_FR",
+    "parent": "hip_FR",
+    "pos": [
+     0,
+     -0.55,
+     -0.06
+    ]
+   },
+   {
+    "name": "paw_FR",
+    "parent": "knee_FR",
+    "pos": [
+     0,
+     -0.46,
+     0.08
+    ]
+   },
+   {
+    "name": "hip_BR",
+    "parent": "root",
+    "pos": [
+     -0.6,
+     1.2,
+     -0.85
+    ]
+   },
+   {
+    "name": "knee_BR",
+    "parent": "hip_BR",
+    "pos": [
+     0,
+     -0.55,
+     0.12
+    ]
+   },
+   {
+    "name": "paw_BR",
+    "parent": "knee_BR",
+    "pos": [
+     0,
+     -0.51,
+     -0.15
+    ]
+   },
+   {
+    "name": "robot_knee",
+    "parent": "root",
+    "pos": [
+     0,
+     1.2,
+     -0.95
+    ]
+   },
+   {
+    "name": "ext_thigh",
+    "parent": "robot_knee",
+    "pos": [
+     0,
+     0,
+     1.25
+    ]
+   },
+   {
+    "name": "mount",
+    "parent": "ext_thigh",
+    "pos": [
+     0,
+     0,
+     -1.42
+    ]
+   }
+  ]
+ }
+}

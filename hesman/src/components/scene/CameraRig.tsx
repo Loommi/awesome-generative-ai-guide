@@ -4,29 +4,32 @@ import { useEffect, useRef } from "react";
 import { CameraControls } from "@react-three/drei";
 import type CameraControlsImpl from "camera-controls";
 import { sceneBridge } from "@/three/sceneBridge";
+import { beastOverview } from "@/three/cameraPresets";
 import { useHesmanStore } from "@/state/store";
 
 export function CameraRig() {
   const controlsRef = useRef<CameraControlsImpl | null>(null);
   const mode = useHesmanStore((s) => s.mode);
-  const reducedMotion = useHesmanStore((s) => s.reducedMotion);
+  const assetsReady = useHesmanStore((s) => s.assetsReady);
 
   useEffect(() => {
     const controls = controlsRef.current;
     if (!controls) return;
     sceneBridge.cameraControls = controls;
-    controls.setLookAt(0, 24, 2, 0, 0, 0, false);
-    const introDelay = reducedMotion ? 50 : 2600;
-    const timer = setTimeout(() => {
-      controls
-        .setLookAt(11, 7, 17, 0, 1.3, 0, !reducedMotion)
-        .then(() => {
-          useHesmanStore.getState().setMode("beast");
-        });
-    }, introDelay);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    controls.setLookAt(0, 30, 3, 0, 0, 0, false);
   }, []);
+
+  useEffect(() => {
+    if (!assetsReady) return;
+    const reduced = useHesmanStore.getState().reducedMotion;
+    const timer = setTimeout(() => {
+      beastOverview(!reduced);
+      setTimeout(() => {
+        if (useHesmanStore.getState().mode === "intro") useHesmanStore.getState().setMode("beast");
+      }, reduced ? 0 : 1600);
+    }, reduced ? 0 : 1200);
+    return () => clearTimeout(timer);
+  }, [assetsReady]);
 
   useEffect(() => {
     const controls = controlsRef.current;
@@ -38,8 +41,8 @@ export function CameraRig() {
     <CameraControls
       ref={controlsRef}
       makeDefault
-      minDistance={2.6}
-      maxDistance={38}
+      minDistance={3}
+      maxDistance={48}
       minPolarAngle={0.001}
       maxPolarAngle={Math.PI - 0.001}
       dollySpeed={0.55}

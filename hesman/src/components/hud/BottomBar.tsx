@@ -82,9 +82,6 @@ export function BottomBar() {
   const canExplode = mode === "combined" && !busy;
   const canReassemble = mode === "exploded" && !busy;
   const canDisassemble = mode === "combined" && !busy;
-  const focus: [number, number, number] =
-    mode === "combined" || mode === "exploded" ? [0, 1.8, 0] : [0, 1, 0];
-  const dist = mode === "combined" || mode === "exploded" ? 10 : 16;
 
   return (
     <div className="pointer-events-auto relative flex flex-wrap items-center justify-center gap-2 border-t border-cyan-500/20 bg-[#030509]/85 px-3 py-3 backdrop-blur-md sm:justify-between sm:px-6">
@@ -145,7 +142,7 @@ export function BottomBar() {
                 <button
                   key={p.id}
                   onClick={() => {
-                    applyCameraPreset(p.id, focus, dist);
+                    applyCameraPreset(p.id, mode);
                     setCamOpen(false);
                   }}
                   className="rounded-sm border border-slate-700/60 px-1.5 py-1.5 font-mono text-[9px] tracking-wider text-slate-300 hover:border-cyan-400/60 hover:text-cyan-200"

@@ -2,8 +2,7 @@
 
 import { useHesmanStore } from "@/state/store";
 import { LION_CONFIGS, LION_ORDER } from "@/lib/lionConfigs";
-import { dockRootXform } from "@/three/poses";
-import { sceneBridge } from "@/three/sceneBridge";
+import { focusUnit } from "@/three/cameraPresets";
 import { playUiSound } from "@/audio/sound";
 
 export function LeftPanel() {
@@ -28,11 +27,7 @@ export function LeftPanel() {
             onClick={() => {
               selectUnit(id);
               playUiSound(audioEnabled, "select");
-              if (mode === "beast") {
-                const dock = dockRootXform(id);
-                const [dx, dy, dz] = dock.pos;
-                sceneBridge.cameraControls?.setLookAt(dx + 3.4, dy + 2.6, dz + 3.4, dx, dy + 1, dz, true);
-              }
+              if (mode === "beast") focusUnit(id);
             }}
             className={`group relative flex items-center gap-2.5 overflow-hidden rounded-sm border px-2.5 py-2 text-left transition-colors ${
               isSelected

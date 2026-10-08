@@ -10,6 +10,7 @@ interface HesmanState {
   reducedMotion: boolean;
   skipToken: number;
   busy: boolean;
+  assetsReady: boolean;
   logLines: string[];
 
   selectUnit: (id: LionId | null) => void;
@@ -20,6 +21,7 @@ interface HesmanState {
   requestSkip: () => void;
   setTransformed: (id: LionId, v: boolean) => void;
   setBusy: (v: boolean) => void;
+  setAssetsReady: (v: boolean) => void;
   log: (line: string) => void;
 }
 
@@ -41,6 +43,7 @@ export const useHesmanStore = create<HesmanState>((set) => ({
       : false,
   skipToken: 0,
   busy: false,
+  assetsReady: false,
   logLines: ["SYSTEM BOOT // HESMAN ASSEMBLY CONTROL ONLINE"],
 
   selectUnit: (id) => set({ selectedUnit: id }),
@@ -52,6 +55,7 @@ export const useHesmanStore = create<HesmanState>((set) => ({
   setTransformed: (id, v) =>
     set((s) => ({ transformedUnits: { ...s.transformedUnits, [id]: v } })),
   setBusy: (v) => set({ busy: v }),
+  setAssetsReady: (v) => set({ assetsReady: v }),
   log: (line) =>
     set((s) => ({ logLines: [...s.logLines.slice(-7), line] })),
 }));
