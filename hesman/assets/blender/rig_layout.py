@@ -16,7 +16,7 @@ STANDARD = {
 }
 
 COMMAND = {
-    "body": {"center": [0.0, 1.55, 0.0], "size": [1.5, 1.1, 3.2]},
+    "body": {"center": [0.0, 1.55, 0.0], "size": [1.8, 1.1, 3.2]},
     "headScale": 1.5,
     "legScale": 1.22,
 }
@@ -84,24 +84,24 @@ def command_pivots():
     ]
     piv += _legs(
         COMMAND,
-        hip_front=[0.8, 1.45, 1.05],
-        hip_rear=[0.8, 1.5, -1.1],
+        hip_front=[0.95, 1.45, 1.05],
+        hip_rear=[0.95, 1.5, -1.1],
         front_knee=[0, -0.72, -0.06],
         front_paw=[0, -0.55, 0.08],
         rear_knee=[0, -0.72, 0.14],
         rear_paw=[0, -0.6, -0.18],
     )
     piv += [
-        _p("fin_L", "root", [0.62, 2.2, 1.1]),
-        _p("fin_R", "root", [-0.62, 2.2, 1.1]),
+        _p("fin_L", "root", [0.74, 2.2, 1.1]),
+        _p("fin_R", "root", [-0.74, 2.2, 1.1]),
         # Retracted robot head hides inside the chassis; extends along +Z (robot "up").
         _p("ext_head", "root", [0, 1.5, 0.1]),
         _p("ext_emblem", "root", [0, 1.18, 0.5]),
         _p("ext_collar", "root", [0, 1.26, 1.32]),
-        _p("att_shoulder_L", "root", [1.05, 1.5, 1.05]),
-        _p("att_shoulder_R", "root", [-1.05, 1.5, 1.05]),
-        _p("att_hip_L", "root", [0.62, 1.45, -1.72]),
-        _p("att_hip_R", "root", [-0.62, 1.45, -1.72]),
+        _p("att_shoulder_L", "root", [1.22, 1.5, 1.05]),
+        _p("att_shoulder_R", "root", [-1.22, 1.5, 1.05]),
+        _p("att_hip_L", "root", [0.68, 1.45, -1.72]),
+        _p("att_hip_R", "root", [-0.68, 1.45, -1.72]),
     ]
     return piv
 

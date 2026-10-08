@@ -119,9 +119,12 @@ export function Hangar() {
   const keyRef = useRef<THREE.DirectionalLight>(null);
   const rimRef = useRef<THREE.DirectionalLight>(null);
   const warnRefs = useRef<THREE.PointLight[]>([]);
+  const floorRef = useRef<THREE.Group>(null);
   const fog = useMemo(() => new THREE.FogExp2("#070b14", 0.011), []);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }) => {
+    // Bottom-up inspection: the deck would occlude the robot from below.
+    if (floorRef.current) floorRef.current.visible = camera.position.y > 0;
     scene.fog = fog;
     scene.environmentIntensity = 0.85 * hangarLights.ambient;
     if (hemiRef.current) hemiRef.current.intensity = 0.9 * hangarLights.ambient;
@@ -179,16 +182,17 @@ export function Hangar() {
         );
       })}
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-        <circleGeometry args={[60, 64]} />
-        <meshStandardMaterial color="#0d131c" metalness={0.45} roughness={0.62} />
-      </mesh>
-
-      <CentralPlatform />
+      <group ref={floorRef}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+          <circleGeometry args={[60, 64]} />
+          <meshStandardMaterial color="#0d131c" metalness={0.45} roughness={0.62} />
+        </mesh>
+        <CentralPlatform />
+        {LION_ORDER.filter((id) => MANIFEST[id].dock.radius > 0).map((id) => (
+          <DockPad key={id} angleDeg={MANIFEST[id].dock.angleDeg} radius={MANIFEST[id].dock.radius} color={MANIFEST[id].color} />
+        ))}
+      </group>
       <Structure />
-      {LION_ORDER.filter((id) => MANIFEST[id].dock.radius > 0).map((id) => (
-        <DockPad key={id} angleDeg={MANIFEST[id].dock.angleDeg} radius={MANIFEST[id].dock.radius} color={MANIFEST[id].color} />
-      ))}
       <Sparkles count={120} scale={[44, 18, 44]} size={1.4} speed={0.22} color="#8fd9ff" opacity={0.4} />
     </group>
   );

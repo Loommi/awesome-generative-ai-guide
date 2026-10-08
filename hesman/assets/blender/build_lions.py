@@ -43,6 +43,7 @@ def make_materials(uid):
         "gold": material("metal_gold", "#d9a630", 1.0, 0.28),
         "white": material("armor_white", "#eceef2", 0.05, 0.36),
         "eye": material("glow_eye", "#ffd23f", 0.0, 0.4, emission="#ffc21a", strength=4.0),
+        "crest": material("paint_crest", "#d0161d", 0.3, 0.3),
     }
     if uid == "black":
         m["red"] = material("paint_red", "#c8161d", 0.3, 0.3)
@@ -114,6 +115,15 @@ def build_body(rig, lay, m, black):
         z = (0.44 + 0.06 * t) * L + 0.012
         add("body", m["dark"], box(W * 0.46, 0.05, 0.05), T(0, y, z), bevel=0.012)
 
+    vy = cy - 0.17
+    vt = (vy - chest_y0) / (chest_top - chest_y0)
+    vx = (0.86 + 0.14 * vt) * W / 2
+    for sx in (1, -1):
+        add("body", m["gold"], box(0.06, 0.26, 0.4), T(sx * vx, vy, 0.3 * L), bevel=0.015)
+        add("body", m["crest"], box(0.07, 0.16, 0.3), T(sx * (vx + 0.006), vy, 0.3 * L), bevel=0.01)
+        for j in range(3):
+            add("body", m["dark"], box(0.075, 0.025, 0.26), T(sx * (vx + 0.008), vy - 0.05 + j * 0.05, 0.3 * L), bevel=0)
+
     # Neck collar
     add("body", m["paint"],
         frustum_y(yt - 0.28, (0, 0.44 * L, W * 0.56, 0.13 * L), yt + 0.08, (0, 0.45 * L, W * 0.46, 0.1 * L)),
@@ -135,14 +145,14 @@ def build_head(rig, k, m, black):
     add("head", m["paint"], frustum_y(-0.12, (0, 0.3, 0.64, 0.62), 0.3, (0, 0.24, 0.5, 0.48)),
         bevel=0.04, panels=[((1, 0, 0), 0.05, 0.015), ((-1, 0, 0), 0.05, 0.015)])
     add("head", m["paint"], frustum_y(0.14, (0, 0.55, 0.68, 0.26), 0.28, (0, 0.47, 0.6, 0.22)), bevel=0.03)
-    add("head", trim, box(0.08, 0.05, 0.3), T(0, 0.3, 0.42) @ Rx(-12), bevel=0.012)
+    add("head", m["crest"], box(0.12, 0.07, 0.34), T(0, 0.31, 0.4) @ Rx(-12), bevel=0.015)
 
     # Mane: a radial collar of angular plates splayed forward around the skull.
     blade = [(-0.13, -0.05), (0.13, -0.05), (0.16, 0.16), (0.0, 0.3), (-0.16, 0.16)]
     for i, ang in enumerate((-150, -105, -60, -20, 20, 60, 105, 150)):
         a = math.radians(ang)
         c = Vector((0, 0.06, 0.06)) + Vector((math.sin(a), math.cos(a), 0)) * 0.33
-        mat = trim if i % 2 else m["paint"]
+        mat = m["gold"] if i % 2 else m["paint"]
         add("head", mat, prism(blade, 0.06), T(tuple(c)) @ Rz(-ang) @ Rx(-38) @ S(1.1, 1.2, 1), bevel=0.015)
     back = [(math.cos(a) * 0.32, math.sin(a) * 0.28) for a in [i * math.pi / 3 for i in range(6)]]
     add("head", m["paint"], prism(back, 0.08), T(0, 0.06, -0.02) @ Ry(180), bevel=0.02)
@@ -184,7 +194,9 @@ def build_legs(rig, g, m):
         add = rig.add
         t = g * 1.3  # cross-section scale: chunky mecha limbs
 
-        add(hip, m["silver"], wheel(0.25 * t, 0.12 * g), T(tuple(Hp + V(sx * 0.1 * t, 0, 0))) @ Rz(-90 * sx), bevel=0.01)
+        add(hip, m["dark"], cylinder(0.36 * t, 0.1 * g, 32), T(tuple(Hp + V(sx * 0.07 * t, 0, 0))) @ Rz(-90 * sx), bevel=0.015)
+        add(hip, m["silver"], wheel(0.3 * t, 0.14 * g), T(tuple(Hp + V(sx * 0.12 * t, 0, 0))) @ Rz(-90 * sx), bevel=0.01)
+        add(hip, m["dark"], wheel(0.13 * t, 0.1 * g), T(tuple(Hp + V(sx * 0.2 * t, 0, 0))) @ Rz(-90 * sx), bevel=0.008)
         d0 = (0.5 if front else 0.66) * t
         add(hip, m["paint"],
             frustum_y(Hp.y + 0.16 * g, (Hp.x + sx * 0.1 * t, Hp.z, 0.12 * t, d0),
@@ -208,18 +220,19 @@ def build_legs(rig, g, m):
         add(knee, m["silver"], wheel(0.14 * t, 0.1 * g), T(tuple(K + V(sx * 0.12 * t, 0, 0))) @ Rz(-90 * sx), bevel=0.008)
         mm4, ln4 = beam_matrix(K, P + V(0, 0.06, 0))
         add(knee, m["paint"], box(0.22 * t, ln4, 0.24 * t), mm4, bevel=0.03)
-        add(knee, m["trim"], box(0.15 * t, ln4 * 0.72, 0.06 * t), mm4 @ T(0, 0, 0.13 * t), bevel=0.015)
+        add(knee, m["white"], box(0.2 * t, ln4 * 0.78, 0.07 * t), mm4 @ T(0, 0, 0.13 * t), bevel=0.02)
 
         add(paw, m["dark"], box(0.2 * t, 0.12 * g, 0.2 * t), T(tuple(P)), bevel=0.02)
+        add(paw, m["gold"], cylinder(0.11 * t, 0.06, 20), T(tuple(P + V(sx * 0.15 * t, 0, 0))) @ Rz(90), bevel=0.01)
         add(paw, m["paint"],
             frustum_y(P.y - 0.14 * g, (P.x, P.z + 0.08 * t, 0.34 * t, 0.44 * t),
                       P.y + 0.05 * g, (P.x, P.z + 0.03 * t, 0.26 * t, 0.3 * t)),
             bevel=0.03)
         for dx in (-0.1, 0, 0.1):
-            add(paw, m["dark"], box(0.085 * t, 0.09 * g, 0.12 * t),
-                T(P.x + dx * t, P.y - 0.09 * g, P.z + 0.3 * t), bevel=0.015)
-            add(paw, m["silver"], prism([(0, 0.04), (0, -0.04), (0.17, -0.07)], 0.05),
-                T(P.x + dx * t, P.y - 0.07 * g, P.z + 0.35 * t) @ Ry(-90) @ S(t), bevel=0)
+            add(paw, m["gold"], box(0.09 * t, 0.1 * g, 0.14 * t),
+                T(P.x + dx * t, P.y - 0.08 * g, P.z + 0.3 * t), bevel=0.02)
+            add(paw, m["gold"], prism([(0, 0.05), (0, -0.05), (0.22, -0.08)], 0.06),
+                T(P.x + dx * t, P.y - 0.06 * g, P.z + 0.37 * t) @ Ry(-90) @ S(t), bevel=0.006)
 
 
 # ------------------------------------------------------------------ tail
@@ -234,6 +247,8 @@ def build_tail(rig, g, m, black):
         sleeve = m["trim"] if black and i == 1 else m["paint"]
         rig.add(piv, sleeve, box(0.17 * g, ln * 0.62, 0.17 * g), mm, bevel=0.025)
         rig.add(piv, m["silver"], cylinder(0.1 * g, 0.07, 14), T(tuple(a)) @ hs.basis(b - a, (0, 1, 0)), bevel=0.01)
+        for f in (0.3, 0.62):
+            rig.add(piv, m["gold"], box(0.2 * g, 0.07, 0.2 * g), mm @ T(0, (f - 0.5) * ln, 0), bevel=0.012)
     spade = [(0, 0.42), (0.13, 0.12), (0.05, 0.0), (-0.05, 0.0), (-0.13, 0.12)]
     rig.add("tail_3", m["gold"], prism(spade, 0.06),
             T(tuple(tip - d3 * 0.05)) @ hs.basis(d3, (0, 1, 0)) @ Ry(90) @ S(g), bevel=0.012)
@@ -295,20 +310,21 @@ def build_command_parts(rig, m):
         emblem(m["emblem"], box(0.1, 0.6, 0.04), T(sx * 0.16, 0.02, 0.075), bevel=0.01)
     emblem(m["emblem"], box(0.24, 0.1, 0.04), T(0, 0.04, 0.075), bevel=0.01)
 
-    # Robot-front armour on the lion's belly.
+    # Robot-front armour on the lion's belly (x scaled to the chassis width).
     add = rig.add
+    kx = rig_layout.COMMAND["body"]["size"][0] / 1.5
     for sx in (1, -1):
-        add("body", m["paint"], frustum_z(0.0, (sx * 0.6, 1.08, 0.3, 0.08), 1.25, (sx * 0.58, 1.07, 0.34, 0.1)), bevel=0.02)
+        add("body", m["paint"], frustum_z(0.0, (sx * 0.62 * kx, 1.08, 0.34 * kx, 0.08), 1.25, (sx * 0.6 * kx, 1.07, 0.38 * kx, 0.1)), bevel=0.02)
         # Collar plates stow inside the chest and slide out in robot mode.
-        add("ext_collar", m["red"], frustum_z(1.2, (sx * 0.42, 1.27, 0.5, 0.22), 1.48, (sx * 0.4, 1.3, 0.54, 0.26)), bevel=0.03)
-        add("ext_collar", m["gold"], box(0.52, 0.05, 0.05), T(sx * 0.42, 1.15, 1.24), bevel=0.01)
-        add("body", m["red"], box(0.22, 0.05, 0.14), T(sx * 0.45, 0.94, -0.88), bevel=0.01)
+        add("ext_collar", m["red"], frustum_z(1.2, (sx * 0.42 * kx, 1.27, 0.5 * kx, 0.22), 1.48, (sx * 0.4 * kx, 1.3, 0.54 * kx, 0.26)), bevel=0.03)
+        add("ext_collar", m["gold"], box(0.52 * kx, 0.05, 0.05), T(sx * 0.42 * kx, 1.15, 1.24), bevel=0.01)
+        add("body", m["red"], box(0.24, 0.05, 0.14), T(sx * 0.5 * kx, 0.94, -0.88), bevel=0.01)
     for i in range(4):
-        add("body", m["purple"], box(0.86, 0.06, 0.11), T(0, 1.1, 0.18 - i * 0.16), bevel=0.02)
-    add("body", m["white"], box(1.58, 0.5, 0.3), T(0, 1.2, -0.88), bevel=0.03)
+        add("body", m["purple"], box(0.86 * kx, 0.06, 0.11), T(0, 1.1, 0.18 - i * 0.16), bevel=0.02)
+    add("body", m["white"], box(1.58 * kx, 0.5, 0.3), T(0, 1.2, -0.88), bevel=0.03)
     add("body", m["gold"], box(0.38, 0.07, 0.34), T(0, 0.93, -0.88), bevel=0.025)
     add("body", m["gold"], prism(star_profile(0.13, 0.055), 0.04), T(0, 0.89, -0.88) @ Rx(90), bevel=0.006)
-    add("body", m["paint"], frustum_z(-1.62, (0, 1.18, 0.5, 0.2), -1.15, (0, 1.12, 0.62, 0.2)), bevel=0.03)
+    add("body", m["paint"], frustum_z(-1.62, (0, 1.18, 0.5 * kx, 0.2), -1.15, (0, 1.12, 0.62 * kx, 0.2)), bevel=0.03)
     add("body", m["red"], frustum_z(-1.6, (0, 1.04, 0.22, 0.06), -1.2, (0, 1.02, 0.3, 0.06)), bevel=0.01)
 
     # Docking hardware at the attachment points.
@@ -317,6 +333,59 @@ def build_command_parts(rig, m):
         add(f"att_shoulder_{side}", m["silver"], wheel(0.25, 0.2), T(tuple(A + V(-sx * 0.12, 0, 0))) @ Rz(-90 * sx), bevel=0.01)
         Hh = rig.w(f"att_hip_{side}")
         add(f"att_hip_{side}", m["silver"], wheel(0.23, 0.16), T(tuple(Hh + V(0, 0, 0.08))) @ Rx(-90), bevel=0.01)
+
+
+# ------------------------------------------------------------- limb units
+
+def build_arm_parts(rig, m, fwd):
+    """Red/Green: extendable fist out of the hindquarters and a belly shoulder connector."""
+    F = rig.w("ext_fist")
+
+    def fist(mat, g, M=None, **kw):
+        rig.add("ext_fist", mat, g, T(tuple(F)) @ (M if M is not None else Matrix.Identity(4)), **kw)
+
+    fist(m["silver"], cylinder(0.17, 0.75, 20), T(0, 0, 0.075) @ Rx(90), bevel=0)
+    fist(m["paint"], box(0.52, 0.52, 0.16), T(0, 0, -0.3), bevel=0.03,
+         panels=[((1, 0, 0), 0.06, 0.015), ((-1, 0, 0), 0.06, 0.015)])
+    fist(m["trim"], box(0.56, 0.56, 0.05), T(0, 0, -0.22), bevel=0.012)
+    fist(m["white"], frustum_z(-0.36, (0, 0.02, 0.44, 0.4), -0.74, (0, 0.0, 0.48, 0.44)), bevel=0.035,
+         panels=[((0, 1, 0), 0.06, 0.015)])
+    # Four fingers curled toward the palm (lion -Y faces the torso), knuckle caps on the back.
+    for i in range(4):
+        x = -0.18 + i * 0.12
+        fist(m["white"], box(0.1, 0.3, 0.16), T(x, -0.04, -0.82), bevel=0.02)
+        fist(m["white"], box(0.1, 0.14, 0.16), T(x, -0.2, -0.7), bevel=0.02)
+        fist(m["silver"], box(0.11, 0.08, 0.1), T(x, 0.12, -0.8), bevel=0.015)
+    fist(m["white"], box(0.14, 0.16, 0.32), T(fwd * 0.27, -0.12, -0.56) @ Rz(fwd * 10), bevel=0.025)
+    fist(m["dark"], box(0.4, 0.3, 0.06), T(0, 0.02, -0.38), bevel=0.01)
+
+    M0 = rig.w("mount")
+    rig.add("mount", m["silver"], wheel(0.27, 0.14), T(tuple(M0 + V(0, 0.05, 0))) @ Rx(180), bevel=0.01)
+    for dz in (-0.34, 0.34):
+        rig.add("mount", m["dark"], box(0.64, 0.08, 0.14), T(tuple(M0 + V(0, 0.07, dz))), bevel=0.02)
+    rig.add("mount", m["trim"], box(0.7, 0.04, 0.05), T(tuple(M0 + V(0, 0.03, 0.43))), bevel=0.01)
+
+
+def build_leg_parts(rig, m):
+    """Blue/Orange: telescoping white thigh with hip ball, hinged at the robot knee."""
+    R = rig.w("robot_knee")
+    E = rig.w("ext_thigh")
+    rig.add("robot_knee", m["dark"], box(0.62, 0.5, 0.36), T(tuple(R)), bevel=0.03)
+    for sx in (1, -1):
+        rig.add("robot_knee", m["silver"], cylinder(0.2, 0.08, 20), T(tuple(R + V(sx * 0.33, 0, 0))) @ Rz(90), bevel=0.01)
+
+    def thigh(mat, g, M=None, **kw):
+        rig.add("ext_thigh", mat, g, T(tuple(E)) @ (M if M is not None else Matrix.Identity(4)), **kw)
+
+    panels = [((1, 0, 0), 0.07, 0.02), ((-1, 0, 0), 0.07, 0.02), ((0, 1, 0), 0.07, 0.02), ((0, -1, 0), 0.07, 0.02)]
+    thigh(m["white"], frustum_z(0.1, (0, 0, 0.5, 0.5), -1.26, (0, 0, 0.6, 0.58)), bevel=0.04, panels=panels)
+    thigh(m["trim"], box(0.36, 0.06, 0.5), T(0, 0.29, -0.55), bevel=0.015)
+    for sx in (1, -1):
+        mm, ln = beam_matrix((sx * 0.34, 0, -0.05), (sx * 0.34, 0, -1.1), up=(0, 1, 0))
+        thigh(m["silver"], cylinder(0.05, ln, 12), mm, bevel=0)
+        thigh(m["dark"], cylinder(0.075, ln * 0.4, 12), mm @ T(0, ln * 0.25, 0), bevel=0)
+    thigh(m["dark"], box(0.68, 0.38, 0.24), T(0, 0, -1.3), bevel=0.03)
+    thigh(m["silver"], cylinder(0.21, 0.74, 24), T(0, 0, -1.38) @ Rz(90), bevel=0.012)
 
 
 # ------------------------------------------------------------------ driver
@@ -346,9 +415,10 @@ def build_unit(uid, out_dir):
     if black:
         build_command_parts(rig, m)
     elif unit["role"] in ("armR", "armL"):
-        raise NotImplementedError("arm role parts not built yet")
+        # In robot mode the arm's flank faces forward: lion -X for the right arm, +X for the left.
+        build_arm_parts(rig, m, fwd=-1 if unit["role"] == "armR" else 1)
     else:
-        raise NotImplementedError("leg role parts not built yet")
+        build_leg_parts(rig, m)
     rig.build()
     path = os.path.join(out_dir, f"{uid}-lion.glb")
     hs.export_glb(path)
