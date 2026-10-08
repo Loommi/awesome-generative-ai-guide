@@ -6,7 +6,7 @@ export const LION_CONFIGS: Record<LionId, LionConfig> = {
     role: "torso",
     name: "Black Lion",
     codename: "UNIT-01 / VANGUARD",
-    colorPrimary: "#0b0c10",
+    colorPrimary: "#363b45",
     colorSecondary: "#d4af37",
     colorAccent: "#22d3ee",
     description:

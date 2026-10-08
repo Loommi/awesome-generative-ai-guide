@@ -147,6 +147,8 @@ export function Hangar() {
         shadow-mapSize-height={1024}
       />
       <pointLight ref={rimRef} position={[-10, 8, -10]} intensity={2.2} color="#22d3ee" />
+      <pointLight position={[0, 3.4, 6.5]} intensity={1.6} color="#bfe6ff" distance={22} decay={1.6} />
+      <pointLight position={[0, 1.6, -5]} intensity={0.9} color="#6fd3ff" distance={18} decay={1.6} />
       {[0, 1, 2, 3].map((i) => {
         const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
         return (
