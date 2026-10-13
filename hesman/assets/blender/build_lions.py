@@ -147,9 +147,10 @@ def build_head(rig, k, m, black):
     add("head", m["paint"], frustum_y(0.14, (0, 0.55, 0.68, 0.26), 0.28, (0, 0.47, 0.6, 0.22)), bevel=0.03)
     add("head", m["crest"], box(0.12, 0.07, 0.34), T(0, 0.31, 0.4) @ Rx(-12), bevel=0.015)
 
-    # Mane: a radial collar of angular plates splayed forward around the skull.
+    # Mane (Black Lion only; the four limb units are maneless lionesses):
+    # a radial collar of angular plates splayed forward around the skull.
     blade = [(-0.13, -0.05), (0.13, -0.05), (0.16, 0.16), (0.0, 0.3), (-0.16, 0.16)]
-    for i, ang in enumerate((-150, -105, -60, -20, 20, 60, 105, 150)):
+    for i, ang in enumerate((-150, -105, -60, -20, 20, 60, 105, 150) if black else ()):
         a = math.radians(ang)
         c = Vector((0, 0.06, 0.06)) + Vector((math.sin(a), math.cos(a), 0)) * 0.33
         mat = m["gold"] if i % 2 else m["paint"]
@@ -256,8 +257,12 @@ def build_tail(rig, g, m, black):
 
 # ------------------------------------------------------------- command unit
 
-def build_command_parts(rig, m):
-    """Black Lion: robot head, chest emblem, belt, wings and docking sockets."""
+def build_command_parts(rig, m, fit=None, kx=None, sockets=True):
+    """Black Lion: robot head, chest emblem, belt, wings and docking sockets.
+
+    `fit` maps the belly armour (authored for the procedural chassis) onto another
+    body volume, e.g. an imported sculpted mesh; `kx` widens it with the chassis.
+    """
     # Wings lie flat on the back in beast mode and swing up behind the shoulders.
     frame = [(-0.2, 0.12), (0.22, 0.12), (0.3, -0.2), (0.08, -1.75), (-0.06, -1.55), (-0.2, -0.3)]
     blade = [(-0.13, 0.05), (0.16, 0.05), (0.22, -0.22), (0.07, -1.5), (-0.03, -1.38), (-0.13, -0.3)]
@@ -311,8 +316,11 @@ def build_command_parts(rig, m):
     emblem(m["emblem"], box(0.24, 0.1, 0.04), T(0, 0.04, 0.075), bevel=0.01)
 
     # Robot-front armour on the lion's belly (x scaled to the chassis width).
-    add = rig.add
-    kx = rig_layout.COMMAND["body"]["size"][0] / 1.5
+    F = fit if fit is not None else Matrix.Identity(4)
+    kx = rig_layout.COMMAND["body"]["size"][0] / 1.5 if kx is None else kx
+
+    def add(pivot, mat, g, M=None, **kw):
+        rig.add(pivot, mat, g, F @ (M if M is not None else Matrix.Identity(4)), **kw)
     for sx in (1, -1):
         add("body", m["paint"], frustum_z(0.0, (sx * 0.62 * kx, 1.08, 0.34 * kx, 0.08), 1.25, (sx * 0.6 * kx, 1.07, 0.38 * kx, 0.1)), bevel=0.02)
         # Collar plates stow inside the chest and slide out in robot mode.
@@ -328,7 +336,8 @@ def build_command_parts(rig, m):
     add("body", m["red"], frustum_z(-1.6, (0, 1.04, 0.22, 0.06), -1.2, (0, 1.02, 0.3, 0.06)), bevel=0.01)
 
     # Docking hardware at the attachment points.
-    for side, sx in (("L", 1), ("R", -1)):
+    add = rig.add
+    for side, sx in (("L", 1), ("R", -1)) if sockets else ():
         A = rig.w(f"att_shoulder_{side}")
         add(f"att_shoulder_{side}", m["silver"], wheel(0.25, 0.2), T(tuple(A + V(-sx * 0.12, 0, 0))) @ Rz(-90 * sx), bevel=0.01)
         Hh = rig.w(f"att_hip_{side}")

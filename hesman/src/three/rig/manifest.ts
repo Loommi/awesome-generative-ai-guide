@@ -91,7 +91,7 @@ export const MANIFEST: Record<LionId, UnitManifest> = {
     dock: { angleDeg: 0, radius: 0 },
     joints: [
       ...legFold,
-      ...tailRetract(1.75, 14, 6),
+      ...tailRetract(1.9, 9.5, 10),
       { node: "neck", window: [0.3, 0.62], robot: { x: -150 }, robotOffset: [0, -0.15, -0.55] },
       { node: "jaw", window: [0.3, 0.5], robot: { x: 0 } },
       { node: "ext_head", window: [0.6, 0.85], robotOffset: [0, 0, 1.5] },
